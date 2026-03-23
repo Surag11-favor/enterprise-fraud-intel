@@ -11,4 +11,12 @@ public class PageController {
     public String login() { return "login"; }
     @GetMapping("/dashboard")
     public String dashboard() { return "dashboard"; }
+    @GetMapping("/threat-scan")
+    public String threatScan() { return "threat-scan"; }
+    @GetMapping("/mitigation-rules")
+    public String mitigationRules() { return "mitigation-rules"; }
+    @GetMapping("/authorized-users")
+    public String authorizedUsers() { return "authorized-users"; }
+    @GetMapping("/audit-logs")
+    public String auditLogs() { return "audit-logs"; }
 }
