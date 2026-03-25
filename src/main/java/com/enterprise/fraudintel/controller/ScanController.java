@@ -35,17 +35,16 @@ public class ScanController {
         // Delegate to ScanService for actual detection
         Map<String, Object> analysisResult = scanService.analyzeUrl(content);
         
-        String riskLevel = (String) analysisResult.get("riskLevel");
-        double riskScore = (Double) analysisResult.get("riskScore");
-        String sentiment = (String) analysisResult.get("sentiment");
+        String riskRating = (String) analysisResult.get("riskRating");
+        double threatScore = (Double) analysisResult.get("threatScore");
         String summary = (String) analysisResult.get("summary");
         
         // Persist Result
         ScanResult result = new ScanResult();
         result.setPayload(content);
-        result.setRiskScore(riskScore);
-        result.setRiskLevel(riskLevel);
-        result.setSocialMediaSentiment(sentiment);
+        result.setRiskScore(threatScore);
+        result.setRiskLevel(riskRating);
+        result.setSocialMediaSentiment(summary);
         scanResultRepository.save(result);
 
         // Audit Log

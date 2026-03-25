@@ -6,8 +6,8 @@ import com.enterprise.fraudintel.repository.AuditLogRepository;
 import com.enterprise.fraudintel.repository.MitigationRuleRepository;
 import org.springframework.stereotype.Service;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -56,9 +56,17 @@ public class ScanService {
         // 0. Shortener Detection (Cloaking Warning)
         for (String shortener : SHORTENER_DOMAINS) {
             if (url.contains(shortener)) {
-                totalScore += 15.0; // Reduced penalty
+                totalScore += 15.0;
                 findings.add("URL Shortener detected (Cloaking context)");
                 break;
+            }
+        }
+
+        // 0.1 Deceptive Keyword Heuristics
+        for (String keyword : DECEPTIVE_KEYWORDS) {
+            if (url.contains(keyword)) {
+                totalScore += 10.0;
+                findings.add("Deceptive keyword identified: " + keyword);
             }
         }
 
@@ -69,7 +77,7 @@ public class ScanService {
         }
 
         try {
-            URL parsedUrl = new URL(url.startsWith("http") ? url : "https://" + url);
+            URL parsedUrl = URI.create(url.startsWith("http") ? url : "https://" + url).toURL();
             String host = parsedUrl.getHost();
             
             String[] parts = host.split("\\.");
@@ -157,16 +165,18 @@ public class ScanService {
 
     private String fetchPageContent(String urlString) {
         try {
-            URL url = new URL(urlString.startsWith("http") ? urlString : "https://" + urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            // Ensure URL starts with http/https for URI.create to work reliably
+            String normalizedUrlString = urlString.startsWith("http") ? urlString : "https://" + urlString;
+            HttpURLConnection conn = (HttpURLConnection) URI.create(normalizedUrlString).toURL().openConnection();
             conn.setRequestMethod("GET");
             conn.setConnectTimeout(3000);
             conn.setReadTimeout(3000);
             conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Enterprise-Threat-Intel/1.0");
             
             if (conn.getResponseCode() == 200) {
-                Scanner scanner = new Scanner(conn.getInputStream()).useDelimiter("\\A");
-                return scanner.hasNext() ? scanner.next().toLowerCase() : "";
+                try (Scanner scanner = new Scanner(conn.getInputStream()).useDelimiter("\\A")) {
+                    return scanner.hasNext() ? scanner.next().toLowerCase() : "";
+                }
             }
         } catch (Exception e) {
             return null; // Return null to indicate scraping failure
@@ -202,40 +212,11 @@ public class ScanService {
         return entropy;
     }
 
-    private int calculateLevenshteinDistance(String x, String y) {
-        int[][] dp = new int[x.length() + 1][y.length() + 1];
-        for (int i = 0; i <= x.length(); i++) {
-            for (int j = 0; j <= y.length(); j++) {
-                if (i == 0) dp[i][j] = j;
-                else if (j == 0) dp[i][j] = i;
-                else dp[i][j] = Math.min(Math.min(dp[i - 1][j - 1] + (x.charAt(i - 1) == y.charAt(j - 1) ? 0 : 1), dp[i - 1][j] + 1), dp[i][j - 1] + 1);
-            }
-        }
-        return dp[x.length()][y.length()];
-    }
-
-    private boolean isReachable(String urlString) {
-        try {
-            URL url = new URL(urlString);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("HEAD");
-            connection.setConnectTimeout(2000); 
-            connection.setReadTimeout(2000);
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Enterprise-Detection-Module/1.0");
-            int responseCode = connection.getResponseCode();
-            return responseCode >= 200 && responseCode < 400;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private Map<String, Object> buildResponse(String riskLevel, double riskScore, String sentiment, String summary) {
+    private Map<String, Object> buildResponse(String risk, double score, String rating, String finding) {
         Map<String, Object> response = new HashMap<>();
-        response.put("riskLevel", riskLevel);
-        response.put("riskScore", riskScore);
-        response.put("sentiment", sentiment);
-        response.put("summary", summary);
+        response.put("riskRating", rating);
+        response.put("threatScore", score);
+        response.put("summary", finding);
         return response;
     }
 }
-
