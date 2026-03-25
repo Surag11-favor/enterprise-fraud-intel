@@ -28,7 +28,7 @@ public class RuleController {
     }
 
     @PostMapping("/{id}/toggle")
-    public ResponseEntity<Void> toggleRule(@PathVariable Long id) {
+    public ResponseEntity<Void> toggleRule(@PathVariable @org.springframework.lang.NonNull Long id) {
         return ruleRepository.findById(id)
             .map(rule -> {
                 rule.setEnabled(!rule.isEnabled());
@@ -39,7 +39,7 @@ public class RuleController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRule(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteRule(@PathVariable @org.springframework.lang.NonNull Long id) {
         ruleRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }

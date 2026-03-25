@@ -29,12 +29,25 @@ public class ScanService {
 
     // Suspicious TLDs commonly used in phishing
     private static final Set<String> SUSPICIOUS_TLDS = Set.of(
-        "xyz", "top", "tk", "ml", "ga", "cf", "gq", "bid", "pw", "buzz", "click"
+        "xyz", "top", "tk", "ml", "ga", "cf", "gq", "bid", "pw", "buzz", "click", "rest", "cam"
     );
 
     // Deceptive keywords often found in fraudulent links
     private static final Set<String> DECEPTIVE_KEYWORDS = Set.of(
         "login", "verify", "secure", "account", "update", "signin", "banking", "support", "billing"
+    );
+
+    // Social Media specific detection
+    private static final Set<String> SOCIAL_MEDIA_BRANDS = Set.of(
+        "facebook", "twitter", "instagram", "tiktok", "linkedin", "snapchat", "youtube", "whatsapp", "telegram", "x", "paypal"
+    );
+
+    private static final Set<String> SHORTENER_DOMAINS = Set.of(
+        "bit.ly", "t.co", "tinyurl.com", "is.gd", "buff.ly", "ow.ly", "rebrand.ly"
+    );
+
+    private static final Set<String> SOCIAL_SCAM_KEYWORDS = Set.of(
+        "giveaway", "free followers", "followers", "nft raffle", "crypto gift", "claim", "hack", "disabled"
     );
 
     public Map<String, Object> analyzeUrl(String rawUrl) {
@@ -46,6 +59,15 @@ public class ScanService {
         double totalScore = 0.0;
         List<String> findings = new ArrayList<>();
 
+        // 0. Shortener Detection (Cloaking Warning)
+        for (String shortener : SHORTENER_DOMAINS) {
+            if (url.contains(shortener)) {
+                totalScore += 25.0;
+                findings.add("URL Shortener detected (Cloaking risk)");
+                break;
+            }
+        }
+
         // 1. Protocol Layer (Basic but critical)
         if (!url.startsWith("https://")) {
             totalScore += 40.0;
@@ -53,7 +75,7 @@ public class ScanService {
         }
 
         try {
-            URL parsedUrl = new URL(url);
+            URL parsedUrl = new URL(url.startsWith("http") ? url : "https://" + url);
             String host = parsedUrl.getHost();
             String path = parsedUrl.getPath();
             
@@ -95,6 +117,15 @@ public class ScanService {
             if (SUSPICIOUS_TLDS.contains(tld)) {
                 totalScore += 25.0;
                 findings.add("Suspicious TLD reputation (." + tld + ")");
+                
+                // Contextual Bonus: Social Media Brand + Suspicious TLD
+                for (String brand : SOCIAL_MEDIA_BRANDS) {
+                    if (domain.contains(brand)) {
+                        totalScore += 30.0;
+                        findings.add("Social Media Phishing pattern (Brand + Risky TLD)");
+                        break;
+                    }
+                }
             }
 
             // 6. Deceptive Pattern Layer (Keywords in Subdomain or Path)
@@ -103,9 +134,18 @@ public class ScanService {
                 .filter(fullContext::contains)
                 .count();
             
+            long socialScamMatches = SOCIAL_SCAM_KEYWORDS.stream()
+                .filter(fullContext::contains)
+                .count();
+
             if (keywordMatches > 0) {
                 totalScore += (15.0 * keywordMatches);
                 findings.add("Deceptive patterns detected (" + keywordMatches + " keywords)");
+            }
+
+            if (socialScamMatches > 0) {
+                totalScore += (20.0 * socialScamMatches);
+                findings.add("Social Media SCAM keywords detected (" + socialScamMatches + ")");
             }
 
             // 7. Structural Integrity (Multi-hyphen detection)

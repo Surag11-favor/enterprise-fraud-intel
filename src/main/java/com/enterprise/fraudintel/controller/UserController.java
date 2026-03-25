@@ -26,14 +26,16 @@ public class UserController {
 
     @PostMapping("/invite")
     public User inviteUser(@RequestBody User user) {
-        // Simple invitation logic: create user with a default password "password123"
-        user.setPassword(passwordEncoder.encode("password123"));
+        // Use provided password or default to 'password123' if empty
+        String rawPassword = (user.getPassword() != null && !user.getPassword().isEmpty()) 
+            ? user.getPassword() : "password123";
+        user.setPassword(passwordEncoder.encode(rawPassword));
         if (user.getRole() == null) user.setRole("USER");
         return userRepository.save(user);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable @org.springframework.lang.NonNull Long id) {
         userRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }
