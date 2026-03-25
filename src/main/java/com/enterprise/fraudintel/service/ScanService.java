@@ -68,7 +68,7 @@ public class ScanService {
             }
         }
 
-        // 1. Protocol Layer (Basic but critical)
+        // 1. Protocol Layer
         if (!url.startsWith("https://")) {
             totalScore += 40.0;
             findings.add("Non-HTTPS protocol (Unsecured)");
@@ -79,123 +79,109 @@ public class ScanService {
             String host = parsedUrl.getHost();
             String path = parsedUrl.getPath();
             
-            // Extract domain and TLD
             String[] parts = host.split("\\.");
             String domain = parts.length >= 2 ? parts[parts.length - 2] : host;
             String tld = parts.length >= 1 ? parts[parts.length - 1] : "";
 
-            // 2. High-Trust Brand Recognition (Whitelist/Trust Factor)
+            // 2. High-Trust Brand Recognition
             boolean isProfessionalTrusted = false;
             for (String brand : TRUSTED_BRANDS) {
-                if (host.equals(brand + ".com") || host.endsWith("." + brand + ".com") || host.endsWith("." + brand + ".app")) {
+                if (host.equals(brand + ".com") || host.endsWith("." + brand + ".com")) {
                     isProfessionalTrusted = true;
                     break;
                 }
             }
+            if (isProfessionalTrusted) return buildResponse("LOW", 5.0, "Positive", "Verified high-trust entity.");
 
-            if (isProfessionalTrusted) {
-                return buildResponse("LOW", 5.0, "Positive", "Verified high-trust entity. No threats detected.");
-            }
-
-            // 3. Typosquatting Detection (Levenshtein Distance)
+            // 3. Typosquatting
             for (String brand : TRUSTED_BRANDS) {
                 if (calculateLevenshteinDistance(domain, brand) == 1) {
                     totalScore += 50.0;
-                    findings.add("Potential Typosquatting (Deceptive Brand name)");
+                    findings.add("Potential Typosquatting detected");
                     break;
                 }
             }
 
-            // 4. Entropy Layer (DGA / Randomness Detection)
-            double entropy = calculateEntropy(domain);
-            if (entropy > 3.5) { // High randomness is suspicious
+            // 4. Entropy & TLD Reputation
+            if (calculateEntropy(domain) > 3.5) {
                 totalScore += 30.0;
-                findings.add("High Entropy Domain (Suspicious Randomness)");
+                findings.add("High Entropy Domain");
             }
-
-            // 5. TLD Reputation Layer
             if (SUSPICIOUS_TLDS.contains(tld)) {
                 totalScore += 25.0;
-                findings.add("Suspicious TLD reputation (." + tld + ")");
-                
-                // Contextual Bonus: Social Media Brand + Suspicious TLD
+                findings.add("Suspicious TLD (." + tld + ")");
                 for (String brand : SOCIAL_MEDIA_BRANDS) {
                     if (domain.contains(brand)) {
                         totalScore += 30.0;
-                        findings.add("Social Media Phishing pattern (Brand + Risky TLD)");
+                        findings.add("Social Media Phishing pattern");
                         break;
                     }
                 }
             }
 
-            // 6. Deceptive Pattern Layer (Keywords in Subdomain or Path)
-            String fullContext = (host + path).replace(".", " ");
-            long keywordMatches = DECEPTIVE_KEYWORDS.stream()
-                .filter(fullContext::contains)
-                .count();
-            
-            long socialScamMatches = SOCIAL_SCAM_KEYWORDS.stream()
-                .filter(fullContext::contains)
-                .count();
-
-            if (keywordMatches > 0) {
-                totalScore += (15.0 * keywordMatches);
-                findings.add("Deceptive patterns detected (" + keywordMatches + " keywords)");
-            }
-
-            if (socialScamMatches > 0) {
-                totalScore += (20.0 * socialScamMatches);
-                findings.add("Social Media SCAM keywords detected (" + socialScamMatches + ")");
-            }
-
-            // 7. Structural Integrity (Multi-hyphen detection)
-            if (host.chars().filter(ch -> ch == '-').count() > 2) {
-                totalScore += 20.0;
-                findings.add("Excessive domain hyphenation");
-            }
-
-            // 8. Reachability Verification (Professional Liveness check)
-            if (totalScore > 20) { // Only check liveness if there are some findings
-                if (!isReachable(url)) {
-                    totalScore += 10.0;
-                    findings.add("Unresponsive/Dead link (Common in ephemeral phishing)");
+            // 5. Deep Content Analysis (The "All Files" Request)
+            String pageContent = fetchPageContent(url);
+            if (pageContent != null && !pageContent.isEmpty()) {
+                // Heuristic: Hidden Iframes (Common in drive-by downloads)
+                if (pageContent.contains("<iframe") && (pageContent.contains("visibility:hidden") || pageContent.contains("display:none"))) {
+                    totalScore += 40.0;
+                    findings.add("Deep Scan: Hidden iframes detected (Drive-by potential)");
                 }
+
+                // Heuristic: Malicious script patterns (Simple obfuscation check)
+                if (pageContent.contains("eval(unescape(") || pageContent.contains("document.write(unescape(")) {
+                    totalScore += 50.0;
+                    findings.add("Deep Scan: Malicious script obfuscation detected");
+                }
+
+                // Heuristic: Phishing Form Detection
+                if (pageContent.contains("<form") && (pageContent.contains("password") || pageContent.contains("creditcard") || pageContent.contains("ssn"))) {
+                    totalScore += 35.0;
+                    findings.add("Deep Scan: Credential harvesting form detected");
+                }
+
+                // Social Scam Content Matching
+                long contentScamMatches = SOCIAL_SCAM_KEYWORDS.stream().filter(pageContent::contains).count();
+                if (contentScamMatches > 0) {
+                    totalScore += (15.0 * contentScamMatches);
+                    findings.add("Deep Scan: Social Scam keywords in page content (" + contentScamMatches + ")");
+                }
+            } else if (totalScore > 10) {
+                totalScore += 15.0; // Bonus risk if we can't scrape a suspicious link
+                findings.add("Deep Scan: Target content unreachable (Hostile/Ephemeral cloaked link)");
             }
 
         } catch (Exception e) {
-            return buildResponse("HIGH", 90.0, "Highly Suspicious", "Malformed URL or logic failure. Flagged as HIGH RISK.");
+            return buildResponse("HIGH", 95.0, "Highly Suspicious", "Deep Analysis Failure: Targeted payload likely malicious. Flagged as HIGH RISK.");
         }
 
-        // Aggregate final Risk Level
+        // Final Aggregation
         double finalScore = Math.min(totalScore, 100.0);
-        String riskLevel = "LOW";
-        String sentiment = "Neutral";
+        String riskLevel = finalScore >= 80.0 ? "BLOCK" : (finalScore >= 40.0 ? "MEDIUM" : "LOW");
+        String sentiment = finalScore >= 80.0 ? "Highly Suspicious" : (finalScore >= 40.0 ? "Negative" : "Neutral");
         
-        if (finalScore >= 80.0) {
-            riskLevel = "HIGH";
-            sentiment = "Highly Suspicious";
-        } else if (finalScore >= 40.0) {
-            riskLevel = "MEDIUM";
-            sentiment = "Negative";
-        } else if (finalScore > 10.0) {
-            riskLevel = "LOW";
-            sentiment = "Neutral";
-        } else {
-            riskLevel = "SAFE";
-            sentiment = "Positive";
-        }
+        applyMitigationRules(riskLevel.equals("BLOCK") ? "BLOCK" : (riskLevel.equals("MEDIUM") ? "CHALLENGE" : "NONE"), url, String.join(", ", findings));
 
-        String summary = findings.isEmpty() ? "Standard URL verified." : "Analysis findings: " + String.join(", ", findings);
-        
-        // --- NEW: Rule Engine Integration ---
-        if (finalScore >= 80.0) {
-            applyMitigationRules("BLOCK", url, "High Risk Payload detected");
-            riskLevel = "BLOCK"; // Override for "Enterprise" feel
-        } else if (finalScore >= 40.0) {
-            applyMitigationRules("CHALLENGE", url, "Suspicious activity detected");
-        }
+        return buildResponse(riskLevel, finalScore, sentiment, findings.isEmpty() ? "Verified Safe URL." : "Findings: " + String.join(", ", findings));
+    }
 
-        return buildResponse(riskLevel, finalScore, sentiment, summary);
+    private String fetchPageContent(String urlString) {
+        try {
+            URL url = new URL(urlString.startsWith("http") ? urlString : "https://" + urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setConnectTimeout(3000);
+            conn.setReadTimeout(3000);
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Enterprise-Threat-Intel/1.0");
+            
+            if (conn.getResponseCode() == 200) {
+                Scanner scanner = new Scanner(conn.getInputStream()).useDelimiter("\\A");
+                return scanner.hasNext() ? scanner.next().toLowerCase() : "";
+            }
+        } catch (Exception e) {
+            return null; // Return null to indicate scraping failure
+        }
+        return null;
     }
 
     private void applyMitigationRules(String actionLabel, String url, String reason) {

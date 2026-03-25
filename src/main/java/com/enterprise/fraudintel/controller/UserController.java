@@ -25,13 +25,19 @@ public class UserController {
     }
 
     @PostMapping("/invite")
-    public User inviteUser(@RequestBody User user) {
+    public ResponseEntity<?> inviteUser(@RequestBody User user) {
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            return ResponseEntity.status(409).body("Investigator username already exists.");
+        }
+        
         // Use provided password or default to 'password123' if empty
         String rawPassword = (user.getPassword() != null && !user.getPassword().isEmpty()) 
             ? user.getPassword() : "password123";
         user.setPassword(passwordEncoder.encode(rawPassword));
         if (user.getRole() == null) user.setRole("USER");
-        return userRepository.save(user);
+        
+        User savedUser = userRepository.save(user);
+        return ResponseEntity.ok(savedUser);
     }
 
     @DeleteMapping("/{id}")

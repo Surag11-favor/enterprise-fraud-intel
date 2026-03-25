@@ -152,10 +152,16 @@
                     },
                     body: JSON.stringify(user)
                 });
-                if(response.ok) location.reload();
-                else alert('Failed to invite user.');
+                
+                if(response.ok) {
+                    location.reload();
+                } else if(response.status === 409) {
+                    alert('Error: This investigator username already exists.');
+                } else {
+                    alert('Failed to invite user. Please check all fields.');
+                }
             } catch (error) {
-                alert('Connection error.');
+                alert('Connection error. Server may be offline.');
             }
         }
 
