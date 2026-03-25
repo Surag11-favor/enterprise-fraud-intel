@@ -1,13 +1,25 @@
 package com.enterprise.fraudintel.service;
 
+import com.enterprise.fraudintel.entity.AuditLog;
+import com.enterprise.fraudintel.entity.MitigationRule;
+import com.enterprise.fraudintel.repository.AuditLogRepository;
+import com.enterprise.fraudintel.repository.MitigationRuleRepository;
 import org.springframework.stereotype.Service;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ScanService {
+
+    private final MitigationRuleRepository ruleRepository;
+    private final AuditLogRepository auditLogRepository;
+
+    public ScanService(MitigationRuleRepository ruleRepository, AuditLogRepository auditLogRepository) {
+        this.ruleRepository = ruleRepository;
+        this.auditLogRepository = auditLogRepository;
+    }
 
     // High-Trust Brands to protect against Typosquatting
     private static final Set<String> TRUSTED_BRANDS = Set.of(
@@ -135,7 +147,30 @@ public class ScanService {
 
         String summary = findings.isEmpty() ? "Standard URL verified." : "Analysis findings: " + String.join(", ", findings);
         
+        // --- NEW: Rule Engine Integration ---
+        if (finalScore >= 80.0) {
+            applyMitigationRules("BLOCK", url, "High Risk Payload detected");
+            riskLevel = "BLOCK"; // Override for "Enterprise" feel
+        } else if (finalScore >= 40.0) {
+            applyMitigationRules("CHALLENGE", url, "Suspicious activity detected");
+        }
+
         return buildResponse(riskLevel, finalScore, sentiment, summary);
+    }
+
+    private void applyMitigationRules(String actionLabel, String url, String reason) {
+        List<MitigationRule> activeRules = ruleRepository.findAll().stream()
+            .filter(MitigationRule::isEnabled)
+            .filter(r -> r.getAction().equalsIgnoreCase(actionLabel))
+            .toList();
+
+        if (!activeRules.isEmpty()) {
+            AuditLog log = new AuditLog();
+            log.setAction(actionLabel);
+            log.setPerformedBy("SYSTEM-ENGINE");
+            log.setDetails(actionLabel + " applied to " + url + " due to " + reason);
+            auditLogRepository.save(log);
+        }
     }
 
     private double calculateEntropy(String s) {

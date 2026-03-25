@@ -60,29 +60,37 @@
                     <tr class="text-muted small uppercase">
                         <th>User</th>
                         <th>Role</th>
-                        <th>ID</th>
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr th:each="u : ${users}">
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="user-avatar me-3" th:text="${#strings.substring(u.username,0,1).toUpperCase()}">A</div>
-                                <div>
-                                    <div class="fw-700" th:text="${u.username}">admin</div>
-                                    <div class="text-muted small">Active Session</div>
+                    <tbody>
+                        <tr th:each="user : ${users}" th:id="'user-' + ${user.id}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle me-3" th:text="${#strings.substring(user.username, 0, 1).toUpperCase()}">A</div>
+                                    <div class="fw-600" th:text="${user.username}">admin_user</div>
                                 </div>
-                            </div>
-                        </td>
-                        <td><span class="badge border border-primary text-primary" th:text="${u.role}">ROLE_ADMIN</span></td>
-                        <td class="text-muted font-monospace" th:text="${u.id}">1</td>
-                        <td><span class="text-success small fw-700"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Online</span></td>
-                        <td><button class="btn btn-sm btn-link text-muted p-0"><i class="bi bi-three-dots-vertical"></i></button></td>
-                    </tr>
-                </tbody>
-            </table>
+                            </td>
+                            <td><span class="badge bg-primary-subtle text-primary rounded-pill px-3" th:text="${user.role}">ADMIN</span></td>
+                            <td class="text-muted small">Active</td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-link text-white-50 p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow border-secondary">
+                                        <li><a class="dropdown-item small" href="#"><i class="bi bi-pencil me-2"></i> Edit Details</a></li>
+                                        <li><a class="dropdown-item small" href="#"><i class="bi bi-shield-lock me-2"></i> Reset Password</a></li>
+                                        <li><hr class="dropdown-divider border-secondary"></li>
+                                        <li><a class="dropdown-item small text-danger" href="#" th:onclick="'deleteUser(' + ${user.id} + ')'"><i class="bi bi-person-x me-2"></i> Remove Investigator</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 </body>

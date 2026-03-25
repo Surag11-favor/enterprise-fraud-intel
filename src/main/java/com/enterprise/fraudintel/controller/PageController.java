@@ -34,10 +34,15 @@ public class PageController {
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
+        // Professional Stats
         model.addAttribute("activeThreats", scanResultRepository.countByRiskLevel("HIGH"));
-        model.addAttribute("blockedThreats", mitigationRuleRepository.countByEnabledTrue());
+        model.addAttribute("blockedThreats", auditLogRepository.countByAction("BLOCK"));
         model.addAttribute("totalScans", scanResultRepository.count());
         model.addAttribute("activeUsers", userRepository.count());
+        
+        // Activity Feed
+        model.addAttribute("recentLogs", auditLogRepository.findAllByOrderByTimestampDesc().stream().limit(5).toList());
+        
         return "dashboard";
     }
 

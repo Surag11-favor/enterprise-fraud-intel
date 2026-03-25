@@ -1,0 +1,40 @@
+package com.enterprise.fraudintel.controller;
+
+import com.enterprise.fraudintel.entity.User;
+import com.enterprise.fraudintel.repository.UserRepository;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @GetMapping
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @PostMapping("/invite")
+    public User inviteUser(@RequestBody User user) {
+        // Simple invitation logic: create user with a default password "password123"
+        user.setPassword(passwordEncoder.encode("password123"));
+        if (user.getRole() == null) user.setRole("USER");
+        return userRepository.save(user);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userRepository.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+}
