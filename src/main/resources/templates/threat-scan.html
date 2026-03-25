@@ -136,6 +136,8 @@
         const csrfToken = document.querySelector('input[name="_csrf"]')?.value;
         const csrfHeader = "X-CSRF-TOKEN";
 
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
         async function performProfessionalScan() {
             const content = document.getElementById('scanInput').value;
             if(!content) return;
@@ -148,58 +150,104 @@
             const resultBox = document.getElementById('resultBox');
             const analysisSummary = document.getElementById('analysisSummary');
 
-            // UI Reset
+            // 1. Initial UI Reset & Standby
             scanBtn.disabled = true;
-            statusBadge.className = 'badge bg-warning text-dark rounded-pill px-3';
-            statusBadge.innerText = 'SCRAPING & ANALYZING...';
-            resultBox.classList.remove('d-none');
+            scanBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> ANALYZING...';
             
-            try {
-                const response = await fetch('/api/analysis/scan', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        [csrfHeader]: csrfToken
-                    },
-                    body: JSON.stringify({ content: content })
-                });
-                
-                const data = await response.json();
-                
-                let current = 0;
-                const target = data.riskScore;
-                const interval = setInterval(() => {
-                    if (current >= target) {
-                        clearInterval(interval);
-                        scanBtn.disabled = false;
-                        statusBadge.className = data.riskLevel === 'BLOCK' ? 'badge bg-danger rounded-pill px-3' : 'badge bg-success rounded-pill px-3';
-                        statusBadge.innerText = data.riskLevel === 'BLOCK' ? 'BLOCKED' : 'COMPLETED';
-                        
-                        // Wait a bit then reload to show in history
-                        setTimeout(() => { if(data.riskLevel !== 'BLOCK') location.reload(); }, 2000);
-                    } else {
-                        current += 1;
-                        riskMeter.style.width = current + '%';
-                        riskValue.innerText = current + '%';
-                        
-                        if(current > 70) riskMeter.className = 'progress-bar progress-bar-striped progress-bar-animated bg-danger';
-                        else if(current > 40) riskMeter.className = 'progress-bar progress-bar-striped progress-bar-animated bg-warning text-dark';
-                        else riskMeter.className = 'progress-bar progress-bar-striped progress-bar-animated bg-primary';
-                    }
-                }, 15);
+            resultBox.classList.remove('d-none');
+            riskMeter.style.width = '0%';
+            riskValue.innerText = '0%';
+            
+            statusBadge.className = 'badge bg-warning text-dark rounded-pill px-3';
+            statusBadge.innerText = 'FETCHING PAYLOAD...';
+            sentimentBadge.className = 'badge bg-secondary rounded-pill px-3';
+            sentimentBadge.innerText = 'ANALYZING';
+            analysisSummary.innerHTML = '<span class="spinner-grow spinner-grow-sm text-primary me-2"></span> Resolving DNS and initiating deep payload extraction...';
+            
+            // Fire the actual backend request concurrently so network latency overlaps with our faux-delay
+            let backendData = null;
+            let backendError = null;
+            const scanPromise = fetch('/api/analysis/scan', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify({ content: content })
+            })
+            .then(res => res.json())
+            .then(data => { backendData = data; })
+            .catch(err => { backendError = err; });
 
-                sentimentBadge.innerText = data.sentiment.toUpperCase();
-                sentimentBadge.className = 'badge rounded-pill px-3 ' + 
-                    (data.sentiment === 'Positive' ? 'bg-success' : (data.sentiment === 'Negative' ? 'bg-warning text-dark' : 'bg-info text-dark'));
+            // 2. Simulate Deep Analysis Stages (Professional UX)
+            await sleep(800);
+            statusBadge.innerText = 'DNS RESOLVED';
+            analysisSummary.innerHTML = '<span class="spinner-grow spinner-grow-sm text-info me-2"></span> Parsing Protocol Layer and Domain Entropy...';
+            riskMeter.style.width = '15%';
+            riskValue.innerText = '15%';
 
-                analysisSummary.innerText = data.summary;
+            await sleep(1200);
+            statusBadge.className = 'badge bg-info text-dark rounded-pill px-3';
+            statusBadge.innerText = 'RUNNING HEURISTICS';
+            analysisSummary.innerHTML = '<span class="spinner-grow spinner-grow-sm text-warning me-2"></span> Executing deep HTML inspection (Iframes, Scripts, Forms)...';
+            riskMeter.style.width = '35%';
+            riskValue.innerText = '35%';
 
-            } catch (error) {
-                console.error('Scan failed:', error);
+            await sleep(1500);
+            statusBadge.innerText = 'CROSS-REFERENCING';
+            analysisSummary.innerHTML = '<span class="spinner-grow spinner-grow-sm text-danger me-2"></span> Checking global threat intel and mitigation rules...';
+            riskMeter.style.width = '50%';
+            riskValue.innerText = '50%';
+
+            // Wait for the actual backend to finish if it was slower than expected
+            await scanPromise;
+
+            if (backendError) {
+                console.error('Scan failed:', backendError);
                 scanBtn.disabled = false;
-                statusBadge.innerText = 'SCAN ERROR';
+                scanBtn.innerHTML = '<i class="bi bi-shield-shaded me-2"></i> START DEEP SCAN';
+                statusBadge.innerText = 'API ERROR';
                 statusBadge.className = 'badge bg-danger rounded-pill px-3';
+                analysisSummary.innerText = "Connection lost or backend engine failure.";
+                return;
             }
+
+            // 3. Reveal Final Analyzed Results smoothly
+            let current = parseInt(riskValue.innerText);
+            const target = backendData.riskScore;
+            
+            // Fast-forward or reverse the meter to the exact backend score
+            const interval = setInterval(() => {
+                if (current === Math.round(target) || (current < target && current >= target) || (current > target && current <= target)) {
+                    clearInterval(interval);
+                    current = Math.round(target);
+                    riskMeter.style.width = current + '%';
+                    riskValue.innerText = current + '%';
+
+                    scanBtn.disabled = false;
+                    scanBtn.innerHTML = '<i class="bi bi-shield-shaded me-2"></i> START DEEP SCAN';
+                    
+                    statusBadge.className = backendData.riskLevel === 'BLOCK' ? 'badge bg-danger rounded-pill px-3' : 'badge bg-success rounded-pill px-3';
+                    statusBadge.innerText = backendData.riskLevel === 'BLOCK' ? 'THREAT DETECTED' : 'VERIFIED SAFE';
+                    
+                    sentimentBadge.innerText = backendData.sentiment.toUpperCase();
+                    sentimentBadge.className = 'badge rounded-pill px-3 ' + 
+                        (backendData.sentiment === 'Positive' ? 'bg-success' : (backendData.sentiment === 'Negative' ? 'bg-warning text-dark' : (backendData.sentiment === 'Highly Suspicious' ? 'bg-danger' : 'bg-info text-dark')));
+
+                    analysisSummary.innerText = backendData.summary;
+
+                    // Automatically reload history if safe to show DB log
+                    setTimeout(() => { if(backendData.riskLevel !== 'BLOCK') location.reload(); }, 2500);
+                } else {
+                    current = current < target ? current + 1 : current - 1;
+                    riskMeter.style.width = current + '%';
+                    riskValue.innerText = current + '%';
+                    
+                    if(current > 70) riskMeter.className = 'progress-bar progress-bar-striped progress-bar-animated bg-danger';
+                    else if(current > 40) riskMeter.className = 'progress-bar progress-bar-striped progress-bar-animated bg-warning text-dark';
+                    else riskMeter.className = 'progress-bar progress-bar-striped progress-bar-animated bg-primary';
+                }
+            }, 10);
         }
     </script>
 </body>
