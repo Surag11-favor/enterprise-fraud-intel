@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 @Controller
 public class RegistrationController {
 
@@ -28,8 +31,20 @@ public class RegistrationController {
     public String registerUser(@RequestParam String username, 
                                @RequestParam String password, 
                                @RequestParam String email) {
+        
+        // Basic Validation
+        if (username.length() < 4) {
+             return "redirect:/register?error=" + encode("IDENTIFIER_TOO_SHORT");
+        }
+        if (password.length() < 6) {
+             return "redirect:/register?error=" + encode("KEY_STRENGTH_INSUFFICIENT");
+        }
+        if (!email.contains("@")) {
+             return "redirect:/register?error=" + encode("INVALID_CONTACT_QUERY");
+        }
+
         if (userRepository.findByUsername(username).isPresent()) {
-            return "redirect:/register?error=User already exists";
+            return "redirect:/register?error=" + encode("USER_EXISTS_IN_REGISTRY");
         }
 
         User user = new User();
@@ -40,5 +55,9 @@ public class RegistrationController {
 
         userRepository.save(user);
         return "redirect:/login?registered";
+    }
+
+    private String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }

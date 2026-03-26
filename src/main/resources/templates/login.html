@@ -3,131 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Enterprise Fraud Intelligence</title>
+    <title>Operator Login | Cyber-Command</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Global Style -->
+    <link rel="stylesheet" th:href="@{/css/cyber-command.css}">
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --primary-color: #3b82f6;
-            --secondary-color: #1e293b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-        }
-
         body {
-            background-color: var(--bg-color);
-            background-image: radial-gradient(circle at top right, rgba(59, 130, 246, 0.15), transparent 40%),
-                              radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent 40%);
-            font-family: 'Inter', sans-serif;
-            color: var(--text-main);
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            background-image: 
+                linear-gradient(rgba(2, 6, 23, 0.85), rgba(2, 6, 23, 0.95)),
+                url('/images/cyber_command_hud_bg.png');
+            background-size: cover;
+            background-position: center;
         }
 
-        .login-glass {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 3rem;
+        .grid-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .login-panel {
             width: 100%;
-            max-width: 450px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-width: 480px;
+            animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
-        .form-control {
-            background-color: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .form-control:focus {
-            background-color: rgba(15, 23, 42, 0.8);
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
-            color: #fff;
+        .form-control-cyber {
+            background: rgba(15, 23, 42, 0.6) !important;
+            border: 1px solid var(--glass-border) !important;
+            color: #fff !important;
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: 0.3s;
         }
 
-        .form-control::placeholder {
-            color: var(--text-muted);
+        .form-control-cyber:focus {
+            border-color: var(--cyber-blue) !important;
+            box-shadow: 0 0 15px var(--cyber-blue-glow) !important;
+            background: rgba(15, 23, 42, 0.8) !important;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            border: none;
-            padding: 0.75rem;
-            font-weight: 600;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
-        }
-
-        .logo-icon {
-            font-size: 3rem;
-            color: var(--primary-color);
+        .logo-glow {
+            font-size: 3.5rem;
+            color: var(--cyber-blue);
+            filter: drop-shadow(0 0 15px var(--cyber-blue));
             margin-bottom: 1rem;
+        }
+
+        .btn-cyber-submit {
+            background: var(--cyber-blue);
+            color: var(--bg-deep) !important;
+            font-weight: 800;
+            border-radius: 12px;
+            padding: 1rem;
+            border: none;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+
+        .btn-cyber-submit:hover {
+            box-shadow: 0 0 25px var(--cyber-blue);
+            transform: scale(1.02);
+        }
+
+        .input-group-text-cyber {
+            background: rgba(0, 242, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-right: none;
+            color: var(--cyber-blue);
+            border-radius: 12px 0 0 12px;
+        }
+
+        .form-control-cyber.ps-0 {
+            border-left: none !important;
+            border-radius: 0 12px 12px 0;
+        }
+        
+        .alert-cyber {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        .alert-cyber-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--emerald-guard);
         }
     </style>
 </head>
 <body>
 
-    <div class="login-glass">
-        <div class="text-center mb-4">
-            <i class="bi bi-shield-lock-fill logo-icon"></i>
-            <h3 class="fw-bold">EFI Platform</h3>
-            <p class="text-muted small">Enterprise Fraud Intelligence &amp; Threat Analysis</p>
-        </div>
+    <div class="grid-overlay"></div>
 
-        <div th:if="${param.error}" class="alert alert-danger p-2 small text-center rounded-3 bg-danger bg-opacity-10 border border-danger text-danger">
-            Invalid username or password.
-        </div>
-
-        <div th:if="${param.logout}" class="alert alert-success p-2 small text-center rounded-3 bg-success bg-opacity-10 border border-success text-success">
-            You have been logged out.
-        </div>
-
-        <form th:action="@{/login}" method="post">
-            <div class="mb-3">
-                <label for="username" class="form-label small fw-semibold text-muted">Username</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent border-end-0 border-light border-opacity-10 text-muted"><i class="bi bi-person"></i></span>
-                    <input type="text" class="form-control border-start-0 ps-0" id="username" name="username" placeholder="Username" required autofocus>
-                </div>
-            </div>
-            
-            <div class="mb-4">
-                <div class="d-flex justify-content-between">
-                    <label for="password" class="form-label small fw-semibold text-muted">Password</label>
-                </div>
-                <div class="input-group" id="show_hide_password">
-                    <span class="input-group-text bg-transparent border-end-0 border-light border-opacity-10 text-muted"><i class="bi bi-key"></i></span>
-                    <input type="password" class="form-control border-start-0 ps-0" id="password" name="password" placeholder="Password" required>
-                    <a href="" class="input-group-text bg-transparent border-light border-opacity-10 text-muted text-decoration-none"><i class="bi bi-eye-slash" aria-hidden="true"></i></a>
-                </div>
+    <div class="login-panel">
+        <div class="glass-card p-5">
+            <div class="login-header">
+                <i class="bi bi-shield-lock-fill logo-glow"></i>
+                <h2 class="fw-800 text-uppercase mb-1" style="letter-spacing: -1px;">Cyber-Command</h2>
+                <p class="text-muted small mono">Neural Intelligence Console // Restricted Access</p>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 mb-3">Sign In Securely</button>
-            <div class="text-center">
-                <p class="small text-muted mb-1">New to the platform?</p>
-                <a th:href="@{/register}" class="text-decoration-none fw-bold" style="color: var(--primary-color);">Create Enterprise Account</a>
+            <!-- Alerts -->
+            <div th:if="${param.registered}" class="alert alert-cyber alert-cyber-success p-3 text-center mb-4">
+                <i class="bi bi-check-circle-fill me-2"></i> ACCOUNT_INITIALIZED // ACCESS_GRANTED
             </div>
-            <p class="text-center small text-muted mt-4">System restricted to authorized personnel only.</p>
-        </form>
+
+            <div th:if="${param.error}" class="alert alert-cyber p-3 text-center mb-4">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> AUTH_FAILURE: INVALID_CREDENTIALS
+            </div>
+
+            <div th:if="${param.logout}" class="alert alert-cyber p-3 text-center mb-4" style="border-color: var(--cyber-blue); color: var(--cyber-blue); background: rgba(56, 189, 248, 0.05);">
+                <i class="bi bi-info-circle-fill me-2"></i> SESSION_TERMINATED // LOGOUT_COMPLETE
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="mb-3">
+                    <label class="form-label small mono text-muted mb-2">OPERATOR_ID</label>
+                    <div class="input-group">
+                        <span class="input-group-text input-group-text-cyber"><i class="bi bi-person-badge"></i></span>
+                        <input type="text" class="form-control form-control-cyber ps-0" id="username" name="username" placeholder="Username" required autofocus>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label small mono text-muted mb-2">ACCESS_KEY</label>
+                    <div class="input-group" id="show_hide_password">
+                        <span class="input-group-text input-group-text-cyber"><i class="bi bi-key-fill"></i></span>
+                        <input type="password" class="form-control form-control-cyber ps-0" id="password" name="password" placeholder="••••••••" required>
+                        <a href="" class="input-group-text btn border-start-0 border-light border-opacity-10 text-muted glass-bg" style="border-radius: 0 12px 12px 0;"><i class="bi bi-eye-slash" aria-hidden="true"></i></a>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-cyber-submit mb-4">Authenticate</button>
+                
+                <div class="text-center pt-2 border-top border-light border-opacity-10">
+                    <p class="small text-muted mb-2">New Investigator?</p>
+                    <a th:href="@{/register}" class="text-decoration-none fw-bold" style="color: var(--cyber-blue);">
+                        Initialize Registry <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+        <p class="text-center small text-muted mt-4 mono opacity-50">© 2026 CYBER-COMMAND PROTOCOL // GLOBAL SECURE</p>
     </div>
 
     <!-- Script to toggle password visibility -->
