@@ -29,8 +29,11 @@ public class SecurityConfig {
         http
             .userDetailsService(userDetailsService)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/actuator/**").permitAll()
                 .anyRequest().authenticated()
+            )
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/api/**", "/actuator/**")
             )
             .formLogin(form -> form
                 .loginPage("/login")
