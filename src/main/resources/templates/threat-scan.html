@@ -74,7 +74,10 @@
 </head>
 <body>
     <!-- Sidebar -->
-    <aside class="cyber-sidebar">
+    <aside class="cyber-sidebar" id="sidebar">
+        <button class="sidebar-toggle d-lg-none" id="sidebarToggle">
+            <i class="bi bi-list"></i>
+        </button>
         <div class="p-4 border-bottom border-secondary border-opacity-25 mb-3">
             <a href="/dashboard" class="text-white text-decoration-none fw-800 d-flex align-items-center">
                 <i class="bi bi-shield-lock-fill me-2 fs-4 text-primary"></i> 
@@ -90,8 +93,11 @@
         </nav>
     </aside>
 
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- Main Content -->
-    <main class="main-content" style="margin-left: 280px; padding: 2.5rem; flex-grow: 1;">
+    <main class="main-content">
         <div class="mb-5">
             <h2 class="fw-800 mb-1">Threat Intelligence Analysis</h2>
             <p class="text-muted small">Deploying neural heuristics to intercept credential harvesters and malicious script payloads.</p>
@@ -381,6 +387,20 @@
                 scanLine.style.display = 'none';
             }
         }
+        // Sidebar mobile toggle
+        const sidebarEl = document.getElementById('sidebar');
+        const overlayEl = document.getElementById('sidebarOverlay');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        
+        toggleBtn?.addEventListener('click', () => {
+            sidebarEl.classList.toggle('show');
+            overlayEl.classList.toggle('active');
+        });
+        
+        overlayEl?.addEventListener('click', () => {
+            sidebarEl.classList.remove('show');
+            overlayEl.classList.remove('active');
+        });
     </script>
 </body>
 </html>

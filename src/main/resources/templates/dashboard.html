@@ -9,13 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cyber-command.css}">
     <style>
-        .sidebar-toggle { display: none; }
-        @media (max-width: 991px) {
-            .cyber-sidebar { margin-left: -280px; }
-            .cyber-sidebar.show { margin-left: 0; }
-            .main-content { margin-left: 0 !important; }
-            .sidebar-toggle { display: block; }
-        }
+        /* Page-specific styles only — responsive handled by cyber-command.css */
     </style>
 </head>
 <body>
@@ -53,8 +47,11 @@
         </div>
     </aside>
 
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- Main Content -->
-    <main class="main-content" style="margin-left: 280px; padding: 2.5rem; flex-grow: 1;">
+    <main class="main-content">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-5">
             <div>
@@ -208,8 +205,15 @@
         updateTime();
 
         // Sidebar mobile toggle
+        const sidebarEl = document.getElementById('sidebar');
+        const overlayEl = document.getElementById('sidebarOverlay');
         document.querySelector('.sidebar-toggle')?.addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('show');
+            sidebarEl.classList.toggle('show');
+            overlayEl.classList.toggle('active');
+        });
+        overlayEl?.addEventListener('click', () => {
+            sidebarEl.classList.remove('show');
+            overlayEl.classList.remove('active');
         });
     </script>
 </body>

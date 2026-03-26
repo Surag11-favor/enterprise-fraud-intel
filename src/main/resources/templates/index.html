@@ -126,9 +126,16 @@
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(10, 255, 153, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(10, 255, 153, 0); } 100% { box-shadow: 0 0 0 0 rgba(10, 255, 153, 0); } }
 
         .big-title {
-            font-size: 4.5rem; line-height: 1; margin-bottom: 1.5rem;
+            font-size: clamp(2.5rem, 8vw, 4.5rem); line-height: 1.1; margin-bottom: 1.5rem;
             background: linear-gradient(to right, #fff, var(--cyber-blue));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        @media (max-width: 768px) {
+            .hero { padding: 80px 0 40px; }
+            .hero-hud { padding: 2rem 1.5rem; border-radius: 24px; }
+            section { padding: 60px 0; }
+            .navbar-brand { font-size: 1.1rem; }
         }
 
         /* Tactical Cards */

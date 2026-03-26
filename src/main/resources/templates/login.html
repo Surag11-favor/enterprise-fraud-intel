@@ -24,6 +24,14 @@
                 url('/images/cyber_command_hud_bg.png');
             background-size: cover;
             background-position: center;
+            overflow-y: auto;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        @media (max-width: 576px) {
+            .login-panel .glass-card { padding: 2rem !important; }
+            .logo-glow { font-size: 2.5rem; }
         }
 
         .grid-overlay {

@@ -1,13 +1,14 @@
 /* 
   CYBER-COMMAND GLOBAL DESIGN SYSTEM 
-  Aesthetics: Glassmorphism, Neon Accents, Pulse Animations
+  Mobile-First Responsive + Glassmorphism + Neon Accents
 */
 
 :root {
     --bg-deep: #020617;
-    --sidebar-bg: rgba(15, 23, 42, 0.8);
+    --sidebar-bg: rgba(15, 23, 42, 0.95);
     --glass-bg: rgba(30, 41, 59, 0.4);
     --glass-border: rgba(255, 255, 255, 0.1);
+    --sidebar-width: 280px;
     
     --cyber-blue: #38bdf8;
     --cyber-blue-glow: rgba(56, 189, 248, 0.4);
@@ -24,14 +25,20 @@
     --text-muted: #94a3b8;
 }
 
+*, *::before, *::after { box-sizing: border-box; }
+
 body {
     background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);
     color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', sans-serif;
     min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
 }
 
-/* Glassmorphism Panel */
+/* ================================================================
+   GLASSMORPHISM PANEL
+   ================================================================ */
 .glass-card {
     background: var(--glass-bg);
     backdrop-filter: blur(12px);
@@ -49,27 +56,71 @@ body {
     transform: translateY(-4px);
 }
 
-/* Sidebar Styling */
+/* ================================================================
+   SIDEBAR — Off-canvas on mobile, fixed on desktop
+   ================================================================ */
 .cyber-sidebar {
-    width: 280px;
+    width: var(--sidebar-width);
     background: var(--sidebar-bg);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-right: 1px solid var(--glass-border);
     position: fixed;
+    top: 0;
+    left: 0;
     height: 100vh;
-    z-index: 1000;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
+/* Sidebar overlay backdrop for mobile */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1040;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Mobile hamburger toggle */
+.sidebar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.6rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    z-index: 1060;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Nav links — touch-friendly sizing */
 .nav-link-cyber {
     display: flex;
     align-items: center;
-    padding: 1rem 1.5rem;
+    padding: 0.9rem 1.25rem;
     color: var(--text-muted) !important;
     border-radius: 16px;
-    margin: 0.5rem 1rem;
+    margin: 0.35rem 0.75rem;
     transition: all 0.3s;
     text-decoration: none;
     font-weight: 600;
+    min-height: 44px;
+    font-size: 0.95rem;
 }
 
 .nav-link-cyber:hover, .nav-link-cyber.active {
@@ -83,7 +134,18 @@ body {
     border: 1px solid rgba(56, 189, 248, 0.3);
 }
 
-/* Neon Pulse Indicators */
+/* Main content area */
+.main-content {
+    margin-left: var(--sidebar-width);
+    padding: 2.5rem;
+    flex-grow: 1;
+    min-height: 100vh;
+    transition: margin-left 0.35s ease;
+}
+
+/* ================================================================
+   NEON PULSE INDICATORS
+   ================================================================ */
 .pulse-emerald {
     box-shadow: 0 0 0 0 var(--emerald-glow);
     animation: pulse-emerald-anim 2s infinite;
@@ -95,7 +157,9 @@ body {
     100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
-/* Professional Tables */
+/* ================================================================
+   PROFESSIONAL TABLES
+   ================================================================ */
 .cyber-table {
     width: 100%;
     border-collapse: separate;
@@ -107,7 +171,8 @@ body {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    padding: 1rem;
+    padding: 0.8rem 1rem;
+    white-space: nowrap;
 }
 
 .cyber-table tr {
@@ -116,7 +181,7 @@ body {
 
 .cyber-table td {
     background: rgba(255, 255, 255, 0.02);
-    padding: 1.2rem 1rem;
+    padding: 1rem 0.8rem;
 }
 
 .cyber-table td:first-child { border-radius: 12px 0 0 12px; }
@@ -127,11 +192,93 @@ body {
     color: #fff;
 }
 
-/* Stats Badges */
+/* ================================================================
+   STATS BADGES
+   ================================================================ */
 .stat-value {
     font-size: 2.5rem;
     font-weight: 800;
     background: linear-gradient(to bottom, #fff, #94a3b8);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+/* ================================================================
+   RESPONSIVE: TABLETS (≤991px) — Sidebar off-canvas
+   ================================================================ */
+@media (max-width: 991.98px) {
+    .cyber-sidebar {
+        transform: translateX(-100%);
+    }
+    .cyber-sidebar.show {
+        transform: translateX(0);
+    }
+
+    .sidebar-toggle {
+        display: flex;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        padding: 1.5rem;
+    }
+
+    .glass-card {
+        border-radius: 18px;
+        padding: 1.5rem;
+    }
+
+    .glass-card:hover {
+        transform: none; /* prevent jumpy hover on touch */
+    }
+
+    .stat-value {
+        font-size: 2rem;
+    }
+}
+
+/* ================================================================
+   RESPONSIVE: PHONES (≤576px) — Compact everything
+   ================================================================ */
+@media (max-width: 576px) {
+    .main-content {
+        padding: 1rem 0.75rem;
+    }
+
+    .glass-card {
+        border-radius: 14px;
+        padding: 1.25rem;
+    }
+
+    .stat-value {
+        font-size: 1.6rem;
+    }
+
+    .cyber-table th {
+        font-size: 0.65rem;
+        padding: 0.6rem 0.5rem;
+    }
+
+    .cyber-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .nav-link-cyber {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+        margin: 0.25rem 0.5rem;
+    }
+
+    /* Stack header flex layouts vertically */
+    .d-flex.justify-content-between.align-items-center.mb-5 {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1rem;
+    }
+
+    h2.fw-800 {
+        font-size: 1.3rem;
+    }
 }
