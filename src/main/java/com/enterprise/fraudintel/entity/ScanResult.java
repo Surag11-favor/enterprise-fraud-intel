@@ -15,7 +15,7 @@ public class ScanResult {
 
     private Double riskScore;
     private String riskLevel;
-    private String socialMediaSentiment; // Requested: "Positive", "Neutral", "Negative"
+    private String socialMediaSentiment;
     
     private LocalDateTime scanTimestamp;
 
