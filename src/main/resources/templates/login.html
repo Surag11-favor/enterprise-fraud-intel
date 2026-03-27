@@ -3,79 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise Security | Sign In</title>
+    <title>CYBER-COMMAND | INITIALIZE</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cyber-command.css}">
     <style>
-        .auth-container {
+        .auth-wrapper {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem 1rem;
+            position: relative;
+            z-index: 5;
+            padding: 2rem;
         }
-        .auth-card {
-            width: 100%;
-            max-width: 420px;
-            padding: 2.5rem;
+        .form-control-glass {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
         }
-        .form-control-dark {
-            background-color: rgba(255,255,255,0.05);
-            border: 1px solid var(--border-color);
-            color: white;
-            padding: 0.8rem 1rem;
-        }
-        .form-control-dark:focus {
-            background-color: rgba(255,255,255,0.08);
-            border-color: var(--primary-color);
-            color: white;
-            box-shadow: none;
-        }
-        .form-label {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            font-weight: 500;
+        .form-control-glass:focus {
+            background: rgba(0,243,255,0.05);
+            border-color: var(--neon-cyan);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(0,243,255,0.2);
         }
     </style>
 </head>
 <body>
-    <div class="ambient-glow"></div>
+    <div class="orbital-glow"></div>
+    <div class="orbital-glow-2"></div>
     
-    <div class="container auth-container">
-        <div class="glass-panel auth-card">
-            <div class="text-center mb-4">
-                <i class="bi bi-shield-check text-primary fs-1 mb-3 d-inline-block"></i>
-                <h3 class="fw-bold mb-1">Welcome back</h3>
-                <p class="text-dim small">Sign in to your enterprise account</p>
+    <div class="auth-wrapper">
+        <div class="glass-panel p-5" style="width: 100%; max-width: 500px;">
+            <div class="text-center mb-5">
+                <i class="bi bi-hexagon-fill display-3" style="color: var(--neon-cyan); text-shadow: 0 0 20px var(--neon-cyan);"></i>
+                <h2 class="fw-900 mt-3 text-white" style="letter-spacing: 2px;">SECURE LOGIN</h2>
             </div>
 
             <div th:if="${param.error}" class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-3 p-3 mb-4 d-flex align-items-center gap-2">
                 <i class="bi bi-exclamation-triangle-fill"></i>
-                <span class="small fw-medium">Invalid credentials. Please verify your identity.</span>
-            </div>
-
-            <div th:if="${param.logout}" class="alert alert-success border-0 bg-success bg-opacity-10 text-success rounded-3 p-3 mb-4 d-flex align-items-center gap-2">
-                <i class="bi bi-check-circle-fill"></i>
-                <span class="small fw-medium">Successfully securely signed out.</span>
+                <span class="small fw-bold">Invalid credentials. Auth denied.</span>
             </div>
 
             <form th:action="@{/login}" method="post">
-                <div class="mb-3">
-                    <label for="username" class="form-label">Enterprise ID (Username)</label>
-                    <input type="text" id="username" name="username" class="form-control form-control-dark rounded-3" required autofocus placeholder="e.g. admin">
-                </div>
                 <div class="mb-4">
-                    <label for="password" class="form-label d-flex justify-content-between">
-                        <span>Passcode</span>
-                        <a href="#" class="text-decoration-none text-primary" style="font-size: 0.8rem;">Forgot?</a>
-                    </label>
-                    <input type="password" id="password" name="password" class="form-control form-control-dark rounded-3" required placeholder="••••••••">
+                    <label class="form-label" style="color: var(--neon-cyan); font-weight: 800; letter-spacing: 1px;">CLEARANCE ID</label>
+                    <input type="text" name="username" class="form-control form-control-glass" required autofocus placeholder="Enter ID">
                 </div>
-                <button type="submit" class="btn-primary-modern w-100 mb-4 border-0">Sign In</button>
-                
-                <div class="text-center">
-                    <p class="text-dim small mb-0">Don't have an account? <a href="/register" class="text-primary text-decoration-none fw-medium">Request Access</a></p>
+                <div class="mb-5">
+                    <label class="form-label" style="color: var(--neon-cyan); font-weight: 800; letter-spacing: 1px;">PASSCODE</label>
+                    <input type="password" name="password" class="form-control form-control-glass" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-ultramodern w-100 border-0" style="padding: 1.2rem;">INITIALIZE SESSION</button>
+                <div class="text-center mt-4">
+                    <a href="/register" style="color: var(--text-dim); text-decoration: none; font-weight: 600;">Request New Access Clearance</a>
                 </div>
             </form>
         </div>
