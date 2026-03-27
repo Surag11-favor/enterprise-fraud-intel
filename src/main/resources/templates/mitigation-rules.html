@@ -6,274 +6,118 @@
     <title>Active Defense | CYBER-COMMAND</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cyber-command.css}">
-    <style>
-        .rule-card {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 1.5rem 0;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .rule-card:last-child { border-bottom: none; }
-        .rule-card:hover { background: rgba(0, 242, 255, 0.03); transform: translateX(10px); }
-
-        .form-switch .form-check-input {
-            width: 3.2rem;
-            height: 1.6rem;
-            cursor: pointer;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-            transition: all 0.3s;
-        }
-        .form-switch .form-check-input:checked {
-            background-color: var(--cyber-cyan);
-            border-color: var(--cyber-cyan);
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
-        }
-
-        .modal-content-cyber {
-            background: rgba(2, 6, 23, 0.95);
-            backdrop-filter: blur(30px);
-            border: 1px solid rgba(0, 242, 255, 0.2);
-            border-radius: 20px;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-        }
-        
-        .input-tactical {
-            background: rgba(255, 255, 255, 0.03) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            color: white !important;
-            border-radius: 12px !important;
-            padding: 0.8rem 1.2rem !important;
-        }
-        .input-tactical:focus {
-            border-color: var(--cyber-cyan) !important;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2) !important;
-        }
-    </style>
 </head>
-<body>
+<body class="fade-in">
 
-    <div class="hud-background"></div>
-    <div class="data-stream"></div>
-
-    <!-- Mobile Sidebar Overlay -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <!-- Ultramodern Sidebar -->
-    <aside class="cyber-sidebar" id="sidebar">
-        <div class="p-4 mb-4">
-            <a class="navbar-brand fw-900 text-uppercase d-flex align-items-center gap-2" href="/" style="color: var(--cyber-cyan); font-size: 1.2rem; text-decoration: none;">
-                <i class="bi bi-shield-lock-fill fs-3"></i> CYBER-COMMAND
-            </a>
-        </div>
-        
-        <nav class="flex-grow-1">
-            <a th:href="@{/dashboard}" class="nav-link-extra"><i class="bi bi-cpu me-3"></i> Neural Console</a>
-            <a th:href="@{/threat-scan}" class="nav-link-extra"><i class="bi bi-radar me-3"></i> Threat Radar</a>
-            <a th:href="@{/mitigation-rules}" class="nav-link-extra active"><i class="bi bi-shield-exclamation me-3"></i> Active Defense</a>
-            <a th:href="@{/authorized-users}" class="nav-link-extra"><i class="bi bi-people me-3"></i> Operator Registry</a>
-            <a th:href="@{/audit-logs}" class="nav-link-extra"><i class="bi bi-journal-text me-3"></i> System Audit</a>
-        </nav>
-
-        <div class="p-4 border-top border-secondary border-opacity-25">
-            <div class="d-flex align-items-center gap-3">
-                <div class="rounded-circle bg-info" style="width: 10px; height: 10px; box-shadow: 0 0 10px var(--cyber-cyan);"></div>
-                <span class="mono extra-small opacity-50">SYS_ADMIN</span>
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="d-flex align-items-center gap-3 mb-5 px-3">
+                <i class="bi bi-shield-lock-fill text-primary fs-3"></i>
+                <span class="fs-4 fw-800 text-white" style="letter-spacing: -1px;">CYBER-COMMAND</span>
             </div>
-            <form th:action="@{/logout}" method="post" class="mt-3">
-                <button type="submit" class="btn btn-outline-danger w-100 rounded-3 py-2 fw-bold small">TERMINATE_SESSION</button>
-            </form>
-        </div>
-    </aside>
-
-    <main class="main-wrap" style="margin-left: var(--sidebar-width); min-height: 100vh; padding: 2rem;">
-        
-        <!-- Mobile Toggle -->
-        <button class="sidebar-toggle mb-4 d-lg-none btn border-0 text-info" id="sidebarToggle">
-            <i class="bi bi-list fs-1"></i>
-        </button>
-
-        <header class="d-flex justify-content-between align-items-end mb-5">
-            <div>
-                <span class="mono extra-small text-info opacity-75">DEFENSE://RULE_ORCHESTRATION</span>
-                <h2 class="fw-800 m-0">Global Mitigation Protocols</h2>
-                <p class="text-muted small">Synchronized Zero-Trust policies for automated threat neutralisation.</p>
-            </div>
-            <button class="btn-elite px-4 py-2" data-bs-toggle="modal" data-bs-target="#deployRuleModal">
-                <i class="bi bi-plus-lg me-2"></i> DEPLOY_NEW_PROTOCOL
-            </button>
-        </header>
-
-        <div class="glass-panel p-4">
-            <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom border-white border-opacity-10">
-                <h5 class="fw-800 m-0 text-info"><i class="bi bi-shield-lock me-2"></i> Active Rule Cluster</h5>
-                <span class="badge rounded-pill bg-white bg-opacity-5 border border-white border-opacity-10 px-3 py-2 mono extra-small" th:text="${#lists.size(rules) + ' NODES_ACTIVE'}">0 NODES_ACTIVE</span>
-            </div>
-
-            <div th:each="rule : ${rules}" class="rule-card d-flex justify-content-between align-items-center" th:id="'rule-' + ${rule.id}">
-                <div>
-                    <div class="d-flex align-items-center gap-3 mb-2">
-                        <h6 class="fw-800 m-0 fs-5" th:text="${rule.name}">Firewall Protocol X</h6>
-                        <span th:class="'badge rounded-pill border px-3 extra-small ' + (${rule.enabled ? 'border-success text-success' : 'border-secondary text-muted'})"
-                              th:text="${rule.enabled ? 'ENFORCED' : 'STANDBY'}">ENFORCED</span>
-                    </div>
-                    <p class="text-muted small mb-3 max-w-600" th:text="${rule.description}">Automated packet filtering for high-entropy sources.</p>
-                    <div class="d-flex gap-4 mono extra-small">
-                        <span class="opacity-50"><i class="bi bi-lightning-charge-fill text-info me-1"></i> MODE: <span class="text-white" th:text="${rule.action}">BLOCK</span></span>
-                        <span class="opacity-50"><i class="bi bi-cpu text-info me-1"></i> PRIORITY: <span class="text-white" th:text="${rule.priority}">01</span></span>
-                    </div>
-                </div>
-                
-                <div class="d-flex align-items-center gap-4">
-                    <div class="form-check form-switch p-0 m-0">
-                        <input class="form-check-input ms-0" type="checkbox" th:checked="${rule.enabled}" 
-                               th:onchange="'toggleRule(' + ${rule.id} + ')'">
-                    </div>
-                    <button class="btn btn-outline-danger btn-sm rounded-circle border-0 p-2" th:onclick="'deleteRule(' + ${rule.id} + ')'">
-                        <i class="bi bi-trash3 fs-5"></i>
+            <nav>
+                <a th:href="@{/dashboard}" class="nav-item"><i class="bi bi-speedometer2"></i> Executive Overview</a>
+                <a th:href="@{/threat-scan}" class="nav-item"><i class="bi bi-radar"></i> Intelligence Scan</a>
+                <a th:href="@{/mitigation-rules}" class="nav-item active"><i class="bi bi-shield-exclamation"></i> Active Defense</a>
+                <a th:href="@{/authorized-users}" class="nav-item"><i class="bi bi-people"></i> Operator Registry</a>
+                <a th:href="@{/audit-logs}" class="nav-item"><i class="bi bi-journal-text"></i> System Audit</a>
+            </nav>
+            <div class="position-absolute bottom-0 start-0 w-100 p-4">
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn-outline w-100 py-2 border-danger text-danger bg-danger bg-opacity-10 border-opacity-20 fs-7">
+                        <i class="bi bi-power me-2"></i> Terminate Session
                     </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="d-flex justify-content-between align-items-center mb-5">
+                <div>
+                    <h2 class="fw-800 text-white m-0">Active Defense Protocols</h2>
+                    <p class="text-muted small">Configure heuristic rules and dynamic response vectors.</p>
+                </div>
+                <!-- Premium Add Rule Button triggering existing modal -->
+                <button type="button" class="btn-premium fs-6" data-bs-toggle="modal" data-bs-target="#addRuleModal">
+                    <i class="bi bi-shield-plus"></i> ENFORCE_NEW_RULE
+                </button>
+            </header>
+
+            <!-- Rules Control Center -->
+            <div class="glass-card p-4">
+                <div class="table-responsive">
+                    <table class="premium-table">
+                        <thead>
+                            <tr>
+                                <th>Protocol Name</th>
+                                <th>Vector Definition</th>
+                                <th>Severity Status</th>
+                                <th>Telemetry Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="rule : ${rules}">
+                                <td class="fw-700 text-white" th:text="${rule.ruleName}">Default Rule</td>
+                                <td class="mono small text-muted" th:text="${rule.ruleDefinition}">pattern_match</td>
+                                <td>
+                                    <span th:classappend="${rule.severity == 'HIGH'} ? 'status-danger' : (${rule.severity == 'MEDIUM'} ? 'status-warning' : 'status-active')"
+                                          class="badge-status" th:text="${rule.severity}">ACTIVE</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/rules/delete/{id}(id=${rule.id})}" class="btn btn-outline-danger border-0 p-2 lh-1 text-danger" title="REVOKE RULE">
+                                        <i class="bi bi-x-octagon"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(rules)}">
+                                <td colspan="4" class="text-center py-5 text-muted mono">NO_ACTIVE_PROTOCOLS_FOUND...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </main>
+    </div>
 
-            <!-- Empty State -->
-            <div th:if="${#lists.isEmpty(rules)}" class="text-center py-5 opacity-40">
-                <i class="bi bi-shield-slash fs-1 d-block mb-3"></i>
-                <p class="mono small">NO_ACTIVE_PROTOCOLS_FOUND // SYSTEM_VULNERABLE</p>
-            </div>
-        </div>
-    </main>
-
-    <!-- Deploy Modal -->
-    <div class="modal fade" id="deployRuleModal" tabindex="-1">
+    <!-- The original Modal is mostly kept, with CSS classes updated for the new theme -->
+    <div class="modal fade" id="addRuleModal" tabindex="-1" aria-labelledby="addRuleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content modal-content-cyber">
-                <div class="modal-header border-0 p-4 pb-2">
-                    <h5 class="fw-900 text-info m-0"><i class="bi bi-shield-plus me-2"></i> Deploy Protocol</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-content glass-card border-0">
+                <div class="modal-header border-bottom border-white border-opacity-10">
+                    <h5 class="modal-title fw-800 text-white" id="addRuleModalLabel">Configure Defense Vector</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <form id="ruleForm">
-                        <div class="mb-4">
-                            <label class="mono extra-small text-info mb-2">PROTOCOL_IDENTIFIER</label>
-                            <input type="text" id="ruleName" class="form-control input-tactical" placeholder="e.g. NEURAL_GATE_01" required>
+                    <form th:action="@{/rules/add}" method="post">
+                        <div class="mb-3">
+                            <label for="ruleName" class="small fw-700 text-muted text-uppercase mb-2">Protocol Identifier</label>
+                            <input type="text" class="form-control bg-dark border-secondary text-white p-3 border-opacity-25" id="ruleName" name="ruleName" placeholder="e.g. BLOCK_IP_RANGE" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ruleDefinition" class="small fw-700 text-muted text-uppercase mb-2">Vector Expression</label>
+                            <textarea class="form-control bg-dark border-secondary text-white p-3 border-opacity-25 mono small" id="ruleDefinition" name="ruleDefinition" rows="3" placeholder="JSON or Regex mapping" required></textarea>
                         </div>
                         <div class="mb-4">
-                            <label class="mono extra-small text-info mb-2">INTELLIGENCE_SUMMARY</label>
-                            <textarea id="ruleDescription" class="form-control input-tactical" rows="3" placeholder="Define threat signature..."></textarea>
+                            <label for="severity" class="small fw-700 text-muted text-uppercase mb-2">Threat Severity</label>
+                            <select class="form-select bg-dark border-secondary text-white p-3 border-opacity-25" id="severity" name="severity">
+                                <option value="LOW">LOW_PRIORITY</option>
+                                <option value="MEDIUM">ELEVATED_RISK</option>
+                                <option value="HIGH" selected>CRITICAL_BREACH</option>
+                            </select>
                         </div>
-                        <div class="row g-3">
-                            <div class="col-md-6 mb-4">
-                                <label class="mono extra-small text-info mb-2">ACTION_VECTOR</label>
-                                <select id="ruleAction" class="form-select input-tactical">
-                                    <option value="BLOCK">BLOCK</option>
-                                    <option value="FLAG">FLAG_ONLY</option>
-                                    <option value="REDIRECT">REDIRECT</option>
-                                    <option value="CHALLENGE">MFA_CHALLENGE</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-4">
-                                <label class="mono extra-small text-info mb-2">PRIORITY_LEVEL</label>
-                                <input type="number" id="rulePriority" class="form-control input-tactical" value="1" min="1" max="100">
-                            </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-secondary px-4 fw-600 rounded-pill" data-bs-dismiss="modal">ABORT</button>
+                            <button type="submit" class="btn-premium px-4">COMMIT VECTOR</button>
                         </div>
                     </form>
-                </div>
-                <div class="modal-footer border-0 p-4 pt-0">
-                    <button type="button" class="btn btn-link text-muted extra-small text-decoration-none" data-bs-dismiss="modal">ABORT_OPERATION</button>
-                    <button type="button" class="btn-elite px-4 py-2" onclick="commitRule()">COMMIT_PROTOCOL</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function commitRule() {
-            const rule = {
-                name: document.getElementById('ruleName').value,
-                description: document.getElementById('ruleDescription').value,
-                action: document.getElementById('ruleAction').value,
-                priority: parseInt(document.getElementById('rulePriority').value),
-                enabled: true
-            };
-
-            fetch('/api/rules', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(rule)
-            }).then(r => { if(r.ok) window.location.reload(); });
-        }
-
-        function toggleRule(id) {
-            fetch(`/api/rules/${id}/toggle`, { method: 'POST' })
-                .then(r => { if(!r.ok) window.location.reload(); });
-        }
-
-        function deleteRule(id) {
-            if(confirm('DECOMMISSION_PROTOCOL_CONFIRMATION: Are you sure?')) {
-                fetch(`/api/rules/${id}`, { method: 'DELETE' })
-                    .then(r => { if(r.ok) window.location.reload(); });
-            }
-        }
-
-        // Sidebar mobile toggle
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const toggle = document.getElementById('sidebarToggle');
-        
-        if(toggle) toggle.addEventListener('click', () => { sidebar.classList.add('show'); overlay.classList.add('active'); });
-        if(overlay) overlay.addEventListener('click', () => { sidebar.classList.remove('show'); overlay.classList.remove('active'); });
-    </script>
-</body>
-</html>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function saveRule() {
-            const rule = {
-                name: document.getElementById('ruleName').value,
-                description: document.getElementById('ruleDescription').value,
-                action: document.getElementById('ruleAction').value,
-                priority: parseInt(document.getElementById('rulePriority').value),
-                enabled: true
-            };
-
-            fetch('/api/rules', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(rule)
-            }).then(response => {
-                if (response.ok) window.location.reload();
-            });
-        }
-
-        function toggleRule(id) {
-            fetch(`/api/rules/${id}/toggle`, { method: 'POST' })
-                .then(response => { if (!response.ok) window.location.reload(); });
-        }
-
-        function deleteRule(id) {
-            if (confirm('Are you sure you want to decommission this protocol?')) {
-                fetch(`/api/rules/${id}`, { method: 'DELETE' })
-                    .then(response => { if (response.ok) window.location.reload(); });
-            }
-        }
-
-        // Sidebar mobile toggle
-        const sidebarEl = document.getElementById('sidebar');
-        const overlayEl = document.getElementById('sidebarOverlay');
-        const toggleBtn = document.getElementById('sidebarToggle');
-        
-        toggleBtn?.addEventListener('click', () => {
-            sidebarEl.classList.toggle('show');
-            overlayEl.classList.toggle('active');
-        });
-        
-        overlayEl?.addEventListener('click', () => {
-            sidebarEl.classList.remove('show');
-            overlayEl.classList.remove('active');
-        });
-    </script>
 </body>
 </html>

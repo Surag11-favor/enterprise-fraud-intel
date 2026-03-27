@@ -6,185 +6,120 @@
     <title>System Audit | CYBER-COMMAND</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cyber-command.css}">
     <style>
-        .audit-timeline {
+        .timeline {
             position: relative;
             padding-left: 3rem;
+            margin-top: 2rem;
         }
-        .audit-timeline::before {
+        .timeline::before {
             content: '';
             position: absolute;
-            left: 1.5rem;
+            left: 11px;
             top: 0;
             bottom: 0;
-            width: 1px;
-            background: linear-gradient(to bottom, var(--cyber-cyan), transparent);
-            opacity: 0.2;
+            width: 2px;
+            background: linear-gradient(180deg, var(--accent-blue) 0%, rgba(59, 130, 246, 0.1) 100%);
         }
-        
-        .log-node {
+        .timeline-item {
             position: relative;
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
         }
-        .log-node::before {
-            content: '';
+        .timeline-dot {
             position: absolute;
-            left: -2rem;
-            top: 0.5rem;
-            width: 12px;
-            height: 12px;
-            background: #020617;
-            border: 2px solid var(--cyber-cyan);
+            left: -3rem;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            box-shadow: 0 0 15px var(--cyber-cyan);
-            z-index: 2;
-        }
-        
-        .log-time-stamp {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-            color: var(--cyber-cyan);
-            opacity: 0.8;
-            margin-bottom: 0.8rem;
-            display: block;
-            letter-spacing: 2px;
-        }
-        
-        .log-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 1.5rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .log-card:hover {
-            background: rgba(0, 242, 255, 0.03);
-            border-color: rgba(0, 242, 255, 0.2);
-            transform: translateY(-5px);
+            background: var(--bg-dark);
+            border: 2px solid var(--accent-blue);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
-<body>
+<body class="fade-in">
 
-    <div class="hud-background"></div>
-    <div class="data-stream"></div>
-
-    <!-- Mobile Sidebar Overlay -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <!-- Ultramodern Sidebar -->
-    <aside class="cyber-sidebar" id="sidebar">
-        <div class="p-4 mb-4">
-            <a class="navbar-brand fw-900 text-uppercase d-flex align-items-center gap-2" href="/" style="color: var(--cyber-cyan); font-size: 1.2rem; text-decoration: none;">
-                <i class="bi bi-shield-lock-fill fs-3"></i> CYBER-COMMAND
-            </a>
-        </div>
-        
-        <nav class="flex-grow-1">
-            <a th:href="@{/dashboard}" class="nav-link-extra"><i class="bi bi-cpu me-3"></i> Neural Console</a>
-            <a th:href="@{/threat-scan}" class="nav-link-extra"><i class="bi bi-radar me-3"></i> Threat Radar</a>
-            <a th:href="@{/mitigation-rules}" class="nav-link-extra"><i class="bi bi-shield-exclamation me-3"></i> Active Defense</a>
-            <a th:href="@{/authorized-users}" class="nav-link-extra"><i class="bi bi-people me-3"></i> Operator Registry</a>
-            <a th:href="@{/audit-logs}" class="nav-link-extra active"><i class="bi bi-journal-text me-3"></i> System Audit</a>
-        </nav>
-
-        <div class="p-4 border-top border-secondary border-opacity-25">
-            <div class="d-flex align-items-center gap-3">
-                <div class="rounded-circle bg-info" style="width: 10px; height: 10px; box-shadow: 0 0 10px var(--cyber-cyan);"></div>
-                <span class="mono extra-small opacity-50">SYS_ADMIN</span>
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="d-flex align-items-center gap-3 mb-5 px-3">
+                <i class="bi bi-shield-lock-fill text-primary fs-3"></i>
+                <span class="fs-4 fw-800 text-white" style="letter-spacing: -1px;">CYBER-COMMAND</span>
             </div>
-            <form th:action="@{/logout}" method="post" class="mt-3">
-                <button type="submit" class="btn btn-outline-danger w-100 rounded-3 py-2 fw-bold small">TERMINATE_SESSION</button>
-            </form>
-        </div>
-    </aside>
-
-    <main class="main-wrap" style="margin-left: var(--sidebar-width); min-height: 100vh; padding: 2rem;">
-        
-        <!-- Mobile Toggle -->
-        <button class="sidebar-toggle mb-4 d-lg-none btn border-0 text-info" id="sidebarToggle">
-            <i class="bi bi-list fs-1"></i>
-        </button>
-
-        <header class="d-flex justify-content-between align-items-end mb-5">
-            <div>
-                <span class="mono extra-small text-info opacity-75">LOGGING://FORENSIC_IMMUTABLE_CHAIN</span>
-                <h2 class="fw-800 m-0">Forensic Audit Trail</h2>
-                <p class="text-muted small">Cryptographically secured record of all system orchestrations.</p>
+            <nav>
+                <a th:href="@{/dashboard}" class="nav-item"><i class="bi bi-speedometer2"></i> Executive Overview</a>
+                <a th:href="@{/threat-scan}" class="nav-item"><i class="bi bi-radar"></i> Intelligence Scan</a>
+                <a th:href="@{/mitigation-rules}" class="nav-item"><i class="bi bi-shield-exclamation"></i> Active Defense</a>
+                <a th:href="@{/authorized-users}" class="nav-item"><i class="bi bi-people"></i> Operator Registry</a>
+                <a th:href="@{/audit-logs}" class="nav-item active"><i class="bi bi-journal-text"></i> System Audit</a>
+            </nav>
+            <div class="position-absolute bottom-0 start-0 w-100 p-4">
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn-outline w-100 py-2 border-danger text-danger bg-danger bg-opacity-10 border-opacity-20 fs-7">
+                        <i class="bi bi-power me-2"></i> Terminate Session
+                    </button>
+                </form>
             </div>
-            <div class="badge rounded-pill bg-white bg-opacity-5 border border-success border-opacity-20 px-4 py-2 text-success mono extra-small">
-                <i class="bi bi-shield-check me-2"></i> CHAIN_INTEGRITY_VERIFIED
-            </div>
-        </header>
+        </aside>
 
-        <div class="glass-panel p-5">
-            <div class="audit-timeline">
-                <div th:each="log : ${logs}" class="log-node">
-                    <span class="log-time-stamp" th:text="${#temporals.format(log.timestamp, 'YYYY-MM-DD // HH:mm:ss.SSS')}">2026-03-25 // 20:30:00.000</span>
-                    <div class="log-card">
-                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-white border-opacity-5">
-                            <h6 class="fw-900 m-0 text-info" th:text="${log.action}">SCAN_EXECUTED</h6>
-                            <span class="mono extra-small opacity-30">EVENT_HEX: [[${#strings.toUpperCase(#strings.substring(log.id.toString(),0,8))}]]</span>
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="d-flex justify-content-between align-items-center mb-5">
+                <div>
+                    <h2 class="fw-800 text-white m-0">Forensic Audit Trail</h2>
+                    <p class="text-muted small">Immutable ledger of all platform interactions and vector modifications.</p>
+                </div>
+                <!-- Export button for premium feel -->
+                <button class="btn btn-outline border-white border-opacity-25 bg-white bg-opacity-5 rounded-pill fs-6 px-4 py-2">
+                    <i class="bi bi-download me-2"></i> EXPORT_LEDGER
+                </button>
+            </header>
+
+            <div class="glass-card p-5">
+                
+                <div th:if="${#lists.isEmpty(logs)}" class="text-center py-5">
+                    <i class="bi bi-inbox text-muted display-1 mb-3 opacity-25"></i>
+                    <h4 class="text-white fw-700">AWAITING_TELEMETRY</h4>
+                    <p class="text-muted mono small">No forensic logs recorded in the current matrix.</p>
+                </div>
+
+                <div class="timeline" th:unless="${#lists.isEmpty(logs)}">
+                    
+                    <div class="timeline-item" th:each="log : ${logs}">
+                        <div class="timeline-dot">
+                            <i class="bi bi-record-circle text-primary fs-6"></i>
                         </div>
-                        
-                        <div class="d-flex gap-5 mb-3">
-                            <div>
-                                <label class="mono extra-small opacity-40 d-block mb-1">OPERATOR</label>
-                                <span class="small fw-700 text-white" th:text="${log.performedBy}">system_kernel</span>
+                        <div class="glass-card p-4 mx-0" style="background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <div class="pulse-active" style="width: 6px; height: 6px;"></div>
+                                        <h5 class="fw-800 text-white m-0" th:text="${log.action}">SCAN_EXECUTED</h5>
+                                    </div>
+                                    <div class="mono small text-muted">VECTOR: [[${log.payload} != null ? ${log.payload} : 'N/A']]</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1 mb-1 fw-700 font-monospace small"
+                                         th:text="${#temporals.format(log.timestamp, 'yyyy-MM-dd HH:mm:ss')}">2026-03-27</div>
+                                </div>
                             </div>
-                            <div>
-                                <label class="mono extra-small opacity-40 d-block mb-1">CLEARANCE</label>
-                                <span class="badge border border-info border-opacity-30 text-info extra-small px-2">LEVEL_04</span>
+                            
+                            <div class="d-flex align-items-center gap-3 mt-3 pt-3 border-top border-white border-opacity-5">
+                                <div class="rounded-circle bg-secondary bg-opacity-25 text-white fw-800 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 0.7rem;" th:text="${#strings.toUpperCase(#strings.substring(log.performedBy,0,1))}">U</div>
+                                <span class="text-white-50 small fw-600">OPERATOR: <span class="text-white" th:text="${log.performedBy}">user</span></span>
                             </div>
-                        </div>
-
-                        <div class="p-3 bg-black bg-opacity-30 rounded-3">
-                            <label class="mono extra-small opacity-40 d-block mb-2">TELEMETRY_DETAILS</label>
-                            <p class="mono small text-white-50 m-0" th:text="${log.details}">Neural heuristic analysis triggered for remote endpoint payload.</p>
                         </div>
                     </div>
-                </div>
 
-                <!-- Empty State -->
-                <div th:if="${#lists.isEmpty(logs)}" class="text-center py-5 opacity-30">
-                    <i class="bi bi-journal-x fs-1 d-block mb-3"></i>
-                    <p class="mono small">NO_RECORDS_FOUND // LEDGER_EMPTY</p>
                 </div>
             </div>
-        </div>
-    </main>
+        </main>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Sidebar mobile toggle
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const toggle = document.getElementById('sidebarToggle');
-        
-        if(toggle) toggle.addEventListener('click', () => { sidebar.classList.add('show'); overlay.classList.add('active'); });
-        if(overlay) overlay.addEventListener('click', () => { sidebar.classList.remove('show'); overlay.classList.remove('active'); });
-    </script>
-</body>
-</html>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Sidebar mobile toggle
-        const sidebarEl = document.getElementById('sidebar');
-        const overlayEl = document.getElementById('sidebarOverlay');
-        const toggleBtn = document.getElementById('sidebarToggle');
-        
-        toggleBtn?.addEventListener('click', () => {
-            sidebarEl.classList.toggle('show');
-            overlayEl.classList.toggle('active');
-        });
-        
-        overlayEl?.addEventListener('click', () => {
-            sidebarEl.classList.remove('show');
-            overlayEl.classList.remove('active');
-        });
-    </script>
 </body>
 </html>

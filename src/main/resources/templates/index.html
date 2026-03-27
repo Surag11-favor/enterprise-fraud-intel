@@ -3,123 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBER-COMMAND | EXTRAORDINARY INTELLIGENCE</title>
+    <title>Enterprise Fraud Intelligence | CYBER-COMMAND</title>
+    <meta name="description" content="Elite AI-driven fraud intelligence and threat analysis platform for the modern enterprise.">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cyber-command.css}">
+    <style>
+        .trusted-logos {
+            opacity: 0.5;
+            filter: grayscale(1);
+            transition: var(--transition);
+        }
+        .trusted-logos:hover {
+            opacity: 1;
+            filter: grayscale(0);
+        }
+        .nav-logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -0.05em;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
 </head>
-<body>
-    <!-- Animated Environment -->
-    <div class="orbital-glow"></div>
-    <div class="orbital-glow-2"></div>
+<body class="fade-in">
 
-    <nav class="navbar navbar-expand-lg py-4 position-relative z-3">
-        <div class="container d-flex justify-content-between align-items-center">
-            <a class="navbar-brand text-white fw-900 fs-3 d-flex align-items-center gap-2" href="#" style="letter-spacing: 2px; text-shadow: 0 0 15px var(--neon-cyan);">
-                <i class="bi bi-hexagon-fill" style="color: var(--neon-cyan);"></i> CYBER-COMMAND
+    <!-- Premium Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top glass-card py-3 mx-4 mt-3" style="border-radius: 20px;">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand nav-logo d-flex align-items-center gap-2" href="#">
+                <i class="bi bi-shield-lock-fill text-primary"></i> CYBER-COMMAND
             </a>
-            <div class="d-flex align-items-center gap-4">
-                <a href="/login" class="text-white text-decoration-none fw-bold text-uppercase" style="letter-spacing: 1px;">Initialize</a>
-                <a href="/register" class="btn-ultramodern" style="padding: 0.5rem 1.5rem; font-size: 0.9rem;">Access Hub</a>
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="bi bi-list text-white fs-2"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto gap-4">
+                    <li class="nav-item"><a class="nav-link text-white-50 fw-500" href="#features">Solutions</a></li>
+                    <li class="nav-item"><a class="nav-link text-white-50 fw-500" href="#intelligence">Intelligence</a></li>
+                    <li class="nav-item"><a class="nav-link text-white-50 fw-500" href="#impact">Platform</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3 mt-lg-0 mt-4">
+                    <a th:href="@{/login}" class="text-white text-decoration-none fw-600 px-3">Sign In</a>
+                    <a th:href="@{/register}" class="btn-premium">Initialize Hub</a>
+                </div>
             </div>
         </div>
     </nav>
 
-    <header class="py-5 position-relative z-3" style="margin-top: 5vh;">
-        <div class="container">
-            <div class="row align-items-center g-5">
-                <div class="col-lg-6">
-                    <div class="status-badge mb-4">
-                        <div class="status-dot"></div>
-                        NEURAL GRID ONLINE // SECURE
+    <!-- Extraordinary Hero Section -->
+    <section class="hero-container container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="badge rounded-pill bg-primary bg-opacity-10 text-primary px-3 py-2 mb-4 fw-700 small border border-primary border-opacity-20">
+                    <span class="pulse-active d-inline-block me-2"></span> ELITE SECURITY PROTOCOL ONLINE
+                </div>
+                <h1 class="hero-title">Defending the <br><span class="gradient-text">Digital Frontier</span></h1>
+                <p class="text-secondary fs-5 mb-5 pe-lg-5" style="max-width: 540px;">
+                    Enterprise-grade fraud intelligence and real-time threat analysis. Built for executives who demand absolute protection and predictive dominance.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a th:href="@{/register}" class="btn-premium py-3 px-5 fs-6">Get Started Now</a>
+                    <a href="#features" class="btn-outline py-3 px-5 fs-6">Explore Features</a>
+                </div>
+                
+                <!-- Hero Counter -->
+                <div class="mt-5 d-flex gap-5">
+                    <div>
+                        <div class="fs-2 fw-800 text-white">99.9<span class="text-primary">%</span></div>
+                        <div class="small text-muted fw-600">THREAT DETECTION</div>
                     </div>
-                    <h1 class="hero-title">Beyond <br>Extraordinary.</h1>
-                    <p class="fs-4 mb-5 text-light" style="max-width: 550px; line-height: 1.5; text-shadow: 0 4px 10px rgba(0,0,0,0.8);">
-                        The ultimate ultramodern threat analysis platform. Deployed exclusively for elite executives. Power, precision, and absolute dominance over the digital perimeter.
-                    </p>
-                    <div class="d-flex gap-4">
-                        <a href="/login" class="btn-ultramodern">Engage System</a>
+                    <div>
+                        <div class="fs-2 fw-800 text-white">&lt;50<span class="text-primary">ms</span></div>
+                        <div class="small text-muted fw-600">RESPONSE LATENCY</div>
                     </div>
                 </div>
-                <div class="col-lg-6">
-                    <div class="hero-img-container">
-                        <!-- Added cache-busting query param to ensure the image forces a load regardless of Spring Boot server cache -->
-                        <img src="/images/ceo_boss.png?update=123" alt="Commander Image" class="hero-img-modern" onerror="this.onerror=null; this.src='/images/african_cyber_command_center_v2.png';">
-                        
-                        <div class="glass-panel p-3 position-absolute bottom-0 start-0 m-4" style="border-radius: 15px;">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="bg-info rounded-circle" style="width: 15px; height: 15px; box-shadow: 0 0 15px var(--neon-cyan);"></div>
-                                <div>
-                                    <h6 class="mb-0 fw-bold text-white fs-5 text-uppercase" style="letter-spacing: 1px;">Executive Feed</h6>
-                                    <small style="color: var(--neon-cyan); font-weight: 600;">ENCRYPTED CHANNEL</small>
-                                </div>
-                            </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image-wrapper">
+                    <img th:src="@{/images/ceo_boss.png}" alt="CEO Commander" class="img-fluid" style="width: 100%; border-radius: 24px;"
+                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1573164060897-425941c47065?q=80&w=2069&auto=format&fit=crop';">
+                    
+                    <!-- Floating Stat Overlay -->
+                    <div class="glass-card position-absolute bottom-0 start-0 m-4 p-4 d-flex align-items-center gap-3" style="background: rgba(10,10,15,0.9);">
+                        <div class="rounded-circle bg-success" style="width: 12px; height: 12px; box-shadow: 0 0 15px var(--accent-emerald);"></div>
+                        <div>
+                            <div class="fw-800 text-white small">EXECUTIVE FEED</div>
+                            <div class="text-success extra-small fw-700 mono">ENCRYPTED // LIVE</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </header>
+    </section>
 
-    <section class="py-5 mt-5 position-relative z-3">
-        <div class="container py-5">
-            <div class="text-center mb-5">
-                <h2 class="display-4 fw-900 mb-3" style="text-shadow: 0 0 20px rgba(255,255,255,0.2);">Ultramodern Defense</h2>
+    <!-- Trusted By Section -->
+    <section class="py-5" style="border-top: 1px solid var(--glass-border); border-bottom: 1px solid var(--glass-border); background: rgba(255,255,255,0.01);">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-5">
+                <div class="fs-4 fw-800 text-white-50"><i class="bi bi-bank me-2"></i> GLOBAL-TRUST</div>
+                <div class="fs-4 fw-800 text-white-50"><i class="bi bi-buildings me-2"></i> NEXUS-CORP</div>
+                <div class="fs-4 fw-800 text-white-50"><i class="bi bi-cpu-fill me-2"></i> TECH-ORCHID</div>
+                <div class="fs-4 fw-800 text-white-50"><i class="bi bi-shield-shaded me-2"></i> QUANTUM-SAFE</div>
+                <div class="fs-4 fw-800 text-white-50"><i class="bi bi-airplane-fill me-2"></i> SKY-LOGISTICS</div>
             </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-5 mt-5">
+        <div class="container py-5">
+            <div class="text-center mb-5 pb-5">
+                <h2 class="display-4 fw-800 mb-3">Ultramodern <span class="gradient-text">Protection</span></h2>
+                <p class="text-secondary mx-auto" style="max-width: 600px;">Deploying next-generation heuristics to intercept and neutralize sophisticated attack vectors before they impact your operations.</p>
+            </div>
+            
             <div class="row g-4">
                 <div class="col-md-4">
-                    <div class="glass-panel p-5 h-100 text-center">
-                        <div class="mb-4 display-4" style="color: var(--neon-cyan); text-shadow: 0 0 20px var(--neon-cyan);"><i class="bi bi-shield-lock"></i></div>
-                        <h4 class="fw-bold mb-3 text-white">Absolute Zero-Trust</h4>
-                        <p style="color: var(--text-dim); font-size: 1.1rem;">Multi-dimensional neural verification at every endpoint. Unprecedented isolation.</p>
+                    <div class="glass-card feature-card">
+                        <i class="bi bi-graph-up-arrow feature-icon"></i>
+                        <h4 class="fw-700 mb-3">AI Threat Intel</h4>
+                        <p class="text-secondary">Advanced machine learning algorithms that anticipate complex fraud patterns in real-time.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="glass-panel p-5 h-100 text-center" style="border-color: var(--neon-purple);">
-                        <div class="mb-4 display-4" style="color: var(--neon-purple); text-shadow: 0 0 20px var(--neon-purple);"><i class="bi bi-infinity"></i></div>
-                        <h4 class="fw-bold mb-3 text-white">Quantum Armor</h4>
-                        <p style="color: var(--text-dim); font-size: 1.1rem;">Lattice-cryptography ensuring your data survives the post-quantum computational era.</p>
+                    <div class="glass-card feature-card">
+                        <i class="bi bi-shield-check feature-icon"></i>
+                        <h4 class="fw-700 mb-3">Zero-Trust Hub</h4>
+                        <p class="text-secondary">Micro-segmentation and continuous verification at every network endpoint.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="glass-panel p-5 h-100 text-center">
-                        <div class="mb-4 display-4" style="color: #00ff9d; text-shadow: 0 0 20px #00ff9d;"><i class="bi bi-eye"></i></div>
-                        <h4 class="fw-bold mb-3 text-white">Predictive Edge</h4>
-                        <p style="color: var(--text-dim); font-size: 1.1rem;">Global AI telemetry that anticipates logic breaches before they even manifest.</p>
+                    <div class="glass-card feature-card">
+                        <i class="bi bi-radar feature-icon"></i>
+                        <h4 class="fw-700 mb-3">Global Radar</h4>
+                        <p class="text-secondary">A unified dashboard monitoring threats across your entire global digital infrastructure.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="py-5 position-relative z-3 mt-4" style="background: rgba(0,0,0,0.4); border-top: 1px solid var(--glass-border); border-bottom: 1px solid var(--glass-border);">
+    <!-- Global Matrix Section -->
+    <section id="intelligence" class="py-5 mt-5 position-relative overflow-hidden" style="background: rgba(0,0,0,0.3);">
         <div class="container py-5">
             <div class="row align-items-center g-5 flex-row-reverse">
                 <div class="col-lg-6">
-                    <div class="hero-img-container">
-                        <!-- Cache-busting to bypass missing image bugs -->
-                        <img src="/images/command_center.png?update=123" alt="Global Matrix" class="hero-img-modern">
+                    <div class="hero-image-wrapper">
+                        <img th:src="@{/images/threat_globe.png}" alt="Global Matrix" class="img-fluid" style="width: 100%; border-radius: 24px;">
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <div class="status-badge mb-4" style="color: var(--neon-cyan); border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0,243,255,0.2);">
-                        <div class="status-dot" style="background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan);"></div>
+                    <div class="badge rounded-pill bg-primary bg-opacity-10 text-primary px-3 py-2 mb-4 fw-700 small border border-primary border-opacity-20">
                         GLOBAL COMMAND MATRIX
                     </div>
-                    <h2 class="display-4 fw-900 mb-4" style="background: linear-gradient(to right, #fff, var(--neon-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Elite Intelligence</h2>
-                    <p class="fs-4 mb-5 text-light" style="line-height: 1.6;">
-                        Orchestrated by the world's most capable tactical operators. Real-time endpoint neutralization and encrypted deepspace communications as standard.
+                    <h2 class="display-4 fw-800 mb-4">Elite <span class="gradient-text">Intelligence</span> Layer</h2>
+                    <p class="text-secondary fs-5 mb-5 pe-lg-5">
+                        Our platform is orchestrated by world-class tactical operators and AI-driven deepspace communication protocols.
                     </p>
+                    <ul class="list-unstyled d-flex flex-column gap-3 mb-5">
+                        <li class="d-flex align-items-center gap-3 text-white-50"><i class="bi bi-check2-circle text-primary fs-4"></i> Real-time endpoint neutralization</li>
+                        <li class="d-flex align-items-center gap-3 text-white-50"><i class="bi bi-check2-circle text-primary fs-4"></i> Encrypted spectral entropy monitoring</li>
+                        <li class="d-flex align-items-center gap-3 text-white-50"><i class="bi bi-check2-circle text-primary fs-4"></i> Forensic immutable ledger tracking</li>
+                    </ul>
+                    <a th:href="@{/register}" class="btn-premium py-3 px-5 fs-6">Initialize Connection</a>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer class="py-5 mt-5 position-relative z-3">
-        <div class="container text-center pt-4" style="border-top: 1px solid var(--glass-border);">
-            <h3 class="fw-900 mb-3" style="letter-spacing: 3px; color: var(--neon-cyan);">CYBER-COMMAND</h3>
-            <p style="color: var(--text-dim);">DESIGNED FOR THE EXTRAORDINARY. © 2026</p>
+    <!-- Impact Section -->
+    <section id="impact" class="py-5 mt-5">
+        <div class="container py-5">
+            <div class="glass-card p-5 text-center position-relative overflow-hidden" style="border: none;">
+                <div class="position-absolute top-0 start-0 w-100 h-100" th:style="'background: url(' + @{/images/command_center.png} + ') center/cover no-repeat; opacity: 0.15; z-index: -1;'"></div>
+                <div class="py-5 my-5">
+                    <h2 class="display-3 fw-800 mb-4">Unprecedented <span class="gradient-text">Dominance</span></h2>
+                    <p class="text-secondary mx-auto fs-5 mb-5" style="max-width: 700px;">The only security platform designed for the extraordinary. Used by elite executives globally to protect mission-critical assets.</p>
+                    <div class="row g-4 mt-4">
+                        <div class="col-md-4">
+                            <h3 class="display-5 fw-800 text-white">1M+</h3>
+                            <p class="text-muted fw-700 small">THREATS BLOCKED</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h3 class="display-5 fw-800 text-white">200+</h3>
+                            <p class="text-muted fw-700 small">GLOBAL CLIENTS</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h3 class="display-5 fw-800 text-white">99.8%</h3>
+                            <p class="text-muted fw-700 small">SYSTEM UPTIME</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="container text-center">
+        <div class="mb-5 pb-5 border-bottom border-white border-opacity-5">
+            <h2 class="nav-logo mb-4">CYBER-COMMAND</h2>
+            <div class="d-flex justify-content-center gap-4 text-white-50">
+                <a href="#" class="text-decoration-none text-white-50 hover-white">Terms</a>
+                <a href="#" class="text-decoration-none text-white-50 hover-white">Privacy</a>
+                <a href="#" class="text-decoration-none text-white-50 hover-white">Intel</a>
+                <a href="#" class="text-decoration-none text-white-50 hover-white">Support</a>
+            </div>
+        </div>
+        <p class="text-muted small">© 2026 CYBER-COMMAND ENTERPRISE. ALL RIGHTS RESERVED. DESIGNED FOR THE EXTRAORDINARY.</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

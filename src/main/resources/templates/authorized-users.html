@@ -6,282 +6,121 @@
     <title>Operator Registry | CYBER-COMMAND</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cyber-command.css}">
-    <style>
-        .op-avatar {
-            width: 48px;
-            height: 48px;
-            background: rgba(0, 242, 255, 0.1);
-            border: 1px solid rgba(0, 242, 255, 0.3);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            color: var(--cyber-cyan);
-            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
-        }
-        .op-row {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .op-row:hover {
-            background: rgba(0, 242, 255, 0.03);
-            transform: scale(1.005);
-        }
-        
-        .modal-content-cyber {
-            background: rgba(2, 6, 23, 0.98);
-            backdrop-filter: blur(40px);
-            border: 1px solid rgba(0, 242, 255, 0.2);
-            border-radius: 24px;
-        }
-
-        .input-op {
-            background: rgba(255, 255, 255, 0.02) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            color: white !important;
-            padding: 0.8rem 1.2rem !important;
-            border-radius: 10px !important;
-        }
-        .input-op:focus {
-            border-color: var(--cyber-cyan) !important;
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.15) !important;
-        }
-    </style>
 </head>
-<body>
+<body class="fade-in">
 
-    <div class="hud-background"></div>
-    <div class="data-stream"></div>
-
-    <!-- Mobile Sidebar Overlay -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <!-- Ultramodern Sidebar -->
-    <aside class="cyber-sidebar" id="sidebar">
-        <div class="p-4 mb-4">
-            <a class="navbar-brand fw-900 text-uppercase d-flex align-items-center gap-2" href="/" style="color: var(--cyber-cyan); font-size: 1.2rem; text-decoration: none;">
-                <i class="bi bi-shield-lock-fill fs-3"></i> CYBER-COMMAND
-            </a>
-        </div>
-        
-        <nav class="flex-grow-1">
-            <a th:href="@{/dashboard}" class="nav-link-extra"><i class="bi bi-cpu me-3"></i> Neural Console</a>
-            <a th:href="@{/threat-scan}" class="nav-link-extra"><i class="bi bi-radar me-3"></i> Threat Radar</a>
-            <a th:href="@{/mitigation-rules}" class="nav-link-extra"><i class="bi bi-shield-exclamation me-3"></i> Active Defense</a>
-            <a th:href="@{/authorized-users}" class="nav-link-extra active"><i class="bi bi-people me-3"></i> Operator Registry</a>
-            <a th:href="@{/audit-logs}" class="nav-link-extra"><i class="bi bi-journal-text me-3"></i> System Audit</a>
-        </nav>
-
-        <div class="p-4 border-top border-secondary border-opacity-25">
-            <div class="d-flex align-items-center gap-3">
-                <div class="rounded-circle bg-info" style="width: 10px; height: 10px; box-shadow: 0 0 10px var(--cyber-cyan);"></div>
-                <span class="mono extra-small opacity-50">SYS_ADMIN</span>
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="d-flex align-items-center gap-3 mb-5 px-3">
+                <i class="bi bi-shield-lock-fill text-primary fs-3"></i>
+                <span class="fs-4 fw-800 text-white" style="letter-spacing: -1px;">CYBER-COMMAND</span>
             </div>
-            <form th:action="@{/logout}" method="post" class="mt-3">
-                <button type="submit" class="btn btn-outline-danger w-100 rounded-3 py-2 fw-bold small">TERMINATE_SESSION</button>
-            </form>
-        </div>
-    </aside>
-
-    <main class="main-wrap" style="margin-left: var(--sidebar-width); min-height: 100vh; padding: 2rem;">
-        
-        <!-- Mobile Toggle -->
-        <button class="sidebar-toggle mb-4 d-lg-none btn border-0 text-info" id="sidebarToggle">
-            <i class="bi bi-list fs-1"></i>
-        </button>
-
-        <header class="d-flex justify-content-between align-items-end mb-5">
-            <div>
-                <span class="mono extra-small text-info opacity-75">ACCESS://OPERATOR_CLEARANCE_MGMT</span>
-                <h2 class="fw-800 m-0">High-Clearance Operator Registry</h2>
-                <p class="text-muted small">Managing elite tactical units and system architects.</p>
+            <nav>
+                <a th:href="@{/dashboard}" class="nav-item"><i class="bi bi-speedometer2"></i> Executive Overview</a>
+                <a th:href="@{/threat-scan}" class="nav-item"><i class="bi bi-radar"></i> Intelligence Scan</a>
+                <a th:href="@{/mitigation-rules}" class="nav-item"><i class="bi bi-shield-exclamation"></i> Active Defense</a>
+                <a th:href="@{/authorized-users}" class="nav-item active"><i class="bi bi-people"></i> Operator Registry</a>
+                <a th:href="@{/audit-logs}" class="nav-item"><i class="bi bi-journal-text"></i> System Audit</a>
+            </nav>
+            <div class="position-absolute bottom-0 start-0 w-100 p-4">
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn-outline w-100 py-2 border-danger text-danger bg-danger bg-opacity-10 border-opacity-20 fs-7">
+                        <i class="bi bi-power me-2"></i> Terminate Session
+                    </button>
+                </form>
             </div>
-            <button class="btn-elite px-4 py-2" data-bs-toggle="modal" data-bs-target="#authorizeOpModal">
-                <i class="bi bi-person-plus-fill me-2"></i> AUTHORIZE_OPERATOR
-            </button>
-        </header>
+        </aside>
 
-        <div class="glass-panel p-4">
-            <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom border-white border-opacity-10">
-                <h5 class="fw-800 m-0 text-info"><i class="bi bi-person-badge me-2"></i> Clearance Registry</h5>
-                <span class="mono extra-small opacity-50" th:text="${#lists.size(users) + ' IDENTITIES_VERIFIED'}">0 IDENTITIES_VERIFIED</span>
-            </div>
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="d-flex justify-content-between align-items-center mb-5">
+                <div>
+                    <h2 class="fw-800 text-white m-0">Operator Registry</h2>
+                    <p class="text-muted small">Manage organizational access and global command privileges.</p>
+                </div>
+                <button type="button" class="btn-premium fs-6" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                    <i class="bi bi-person-plus"></i> PROVISION_CLEARANCE
+                </button>
+            </header>
 
-            <div class="table-responsive">
-                <table class="table table-dark align-middle border-0">
-                    <thead class="extra-small mono opacity-40">
-                        <tr>
-                            <th class="border-0">OPERATOR_IDENTITY</th>
-                            <th class="border-0">DESIGNATION</th>
-                            <th class="border-0">ENCRYPTION_STATUS</th>
-                            <th class="border-0 text-end">ORCHESTRATION</th>
-                        </tr>
-                    </thead>
-                    <tbody class="small">
-                        <tr th:each="user : ${users}" th:id="'user-' + ${user.id}" class="op-row">
-                            <td class="py-4">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="op-avatar" th:text="${#strings.substring(user.username, 0, 1).toUpperCase()}">S</div>
-                                    <div>
-                                        <div class="fw-900 fs-6 text-white" th:text="${user.username}">specter_01</div>
-                                        <div class="mono extra-small text-info opacity-50" th:text="${user.email}">specter@command.net</div>
+            <div class="glass-card p-4">
+                <div class="table-responsive">
+                    <table class="premium-table">
+                        <thead>
+                            <tr>
+                                <th>Codename (ID)</th>
+                                <th>Clearance Tier</th>
+                                <th>Last Matrix Interaction</th>
+                                <th>Access Control</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${users}">
+                                <td class="fw-700 text-white">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-primary bg-opacity-25 text-primary fw-800 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" th:text="${#strings.toUpperCase(#strings.substring(user.username,0,1))}">U</div>
+                                        <span th:text="${user.username}">user</span>
                                     </div>
-                                </div>
-                            </td>
-                            <td class="py-4">
-                                <span class="badge rounded-pill border border-info text-info px-3 py-2 extra-small" th:text="${user.role}">INVESTIGATOR</span>
-                            </td>
-                            <td class="py-4">
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="rounded-circle bg-success" style="width: 8px; height: 8px; box-shadow: 0 0 10px #00ffa3;"></div>
-                                    <span class="mono extra-small text-success">ENCRYPTED_LINK</span>
-                                </div>
-                            </td>
-                            <td class="py-4 text-end">
-                                <div class="dropdown">
-                                    <button class="btn btn-link text-info p-0 border-0" data-bs-toggle="dropdown">
-                                        <i class="bi bi-three-dots-vertical fs-5"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-2 border border-info border-opacity-20 shadow-lg">
-                                        <li><a class="dropdown-item rounded-2 py-2 small" href="#"><i class="bi bi-key me-2"></i> Rotate Keys</a></li>
-                                        <li><a class="dropdown-item rounded-2 py-2 small" href="#"><i class="bi bi-shield-check me-2"></i> Audit Profile</a></li>
-                                        <li><hr class="dropdown-divider opacity-10"></li>
-                                        <li><a class="dropdown-item rounded-2 py-2 small text-danger fw-bold" href="#" th:onclick="'revokeAccess(' + ${user.id} + ')'"><i class="bi bi-slash-circle me-2"></i> REVOKE_ACCESS</a></li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                </td>
+                                <td>
+                                    <span th:classappend="${user.role == 'ADMIN'} ? 'status-danger' : 'status-active'" class="badge-status" th:text="${user.role}">USER</span>
+                                </td>
+                                <td class="mono small text-muted">SYNCHRONIZED_STABLE</td>
+                                <td>
+                                    <!-- Prevent self-deletion if username matches -->
+                                    <a th:if="${#authentication.name != user.username}" th:href="@{/authorized-users/delete/{id}(id=${user.id})}" class="btn btn-outline-danger border-0 p-2 lh-1 text-danger" title="REVOKE CLEARANCE">
+                                        <i class="bi bi-x-octagon"></i>
+                                    </a>
+                                    <span th:if="${#authentication.name == user.username}" class="badge bg-secondary bg-opacity-50 text-white rounded-pill px-3 fw-600 border border-secondary border-opacity-50">CURRENT_SESSION</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(users)}">
+                                <td colspan="4" class="text-center py-5 text-muted mono">NO_OPERATORS_FOUND...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-    </main>
+        </main>
+    </div>
 
-    <!-- Auth Modal -->
-    <div class="modal fade" id="authorizeOpModal" tabindex="-1">
+    <!-- The original Modal is mostly kept, with CSS classes updated for the new theme -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content modal-content-cyber">
-                <div class="modal-header border-0 p-4 pb-2">
-                    <h5 class="fw-900 text-info m-0"><i class="bi bi-person-plus me-2"></i> Authorize Operator</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-content glass-card border-0">
+                <div class="modal-header border-bottom border-white border-opacity-10">
+                    <h5 class="modal-title fw-800 text-white" id="addUserModalLabel">Provision New Identity</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <form id="authForm">
-                        <div class="mb-4">
-                            <label class="mono extra-small text-info mb-2">CODENAME (USERNAME)</label>
-                            <input type="text" id="newUsername" class="form-control input-op" placeholder="e.g. ALPHA_VINCERE" required>
+                    <form th:action="@{/authorized-users/add}" method="post">
+                        <div class="mb-3">
+                            <label for="username" class="small fw-700 text-muted text-uppercase mb-2">Codename (ID)</label>
+                            <input type="text" class="form-control bg-dark border-secondary text-white p-3 border-opacity-25" id="username" name="username" placeholder="agent_alpha" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="small fw-700 text-muted text-uppercase mb-2">Passcode</label>
+                            <input type="password" class="form-control bg-dark border-secondary text-white p-3 border-opacity-25 mono small" id="password" name="password" placeholder="••••••••" required>
                         </div>
                         <div class="mb-4">
-                            <label class="mono extra-small text-info mb-2">SECURE_COMM_ENDPOINT (EMAIL)</label>
-                            <input type="email" id="newEmail" class="form-control input-op" placeholder="op@command.net" required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="mono extra-small text-info mb-2">ACCESS_BYPASS_PHRASE (PASSWORD)</label>
-                            <input type="password" id="newPassword" class="form-control input-op" placeholder="••••••••" required>
-                        </div>
-                        <div class="mb-2">
-                            <label class="mono extra-small text-info mb-2">CLEARANCE_LEVEL</label>
-                            <select id="newRole" class="form-select input-op">
-                                <option value="ADMIN">SYS_ADMIN (ALL_ACCESS)</option>
-                                <option value="ANALYST">THREAT_ANALYST (RADAR_ACCESS)</option>
-                                <option value="AUDITOR">AUDITOR (LOG_ACCESS)</option>
+                            <label for="role" class="small fw-700 text-muted text-uppercase mb-2">Clearance Tier</label>
+                            <select class="form-select bg-dark border-secondary text-white p-3 border-opacity-25" id="role" name="role">
+                                <option value="USER" selected>TACTICAL OPERATOR (USER)</option>
+                                <option value="ADMIN">SYSTEM SUPREME (ADMIN)</option>
                             </select>
                         </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-secondary px-4 fw-600 rounded-pill" data-bs-dismiss="modal">ABORT</button>
+                            <button type="submit" class="btn-premium px-4">AUTHORIZE_IDENTITY</button>
+                        </div>
                     </form>
-                </div>
-                <div class="modal-footer border-0 p-4 pt-0">
-                    <button type="button" class="btn btn-link text-muted extra-small text-decoration-none" data-bs-dismiss="modal">ABORT_SYNC</button>
-                    <button type="button" class="btn-elite px-4 py-2" onclick="commitOp()">GRANT_CLEARANCE</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function commitOp() {
-            const user = {
-                username: document.getElementById('newUsername').value,
-                email: document.getElementById('newEmail').value,
-                password: document.getElementById('newPassword').value,
-                role: document.getElementById('newRole').value
-            };
-
-            fetch('/api/users/invite', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(user)
-            }).then(r => { 
-                if(r.ok) window.location.reload(); 
-                else r.text().then(t => alert(t));
-            });
-        }
-
-        function revokeAccess(id) {
-            if(confirm('ACCESS_REVOCATION_CONFIRMATION: Are you sure?')) {
-                fetch(`/api/users/${id}`, { method: 'DELETE' })
-                    .then(r => { if(r.ok) window.location.reload(); });
-            }
-        }
-
-        // Sidebar mobile toggle
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const toggle = document.getElementById('sidebarToggle');
-        
-        if(toggle) toggle.addEventListener('click', () => { sidebar.classList.add('show'); overlay.classList.add('active'); });
-        if(overlay) overlay.addEventListener('click', () => { sidebar.classList.remove('show'); overlay.classList.remove('active'); });
-    </script>
-</body>
-</html>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function inviteUser() {
-            const user = {
-                username: document.getElementById('newUsername').value,
-                email: document.getElementById('newEmail').value,
-                password: document.getElementById('newPassword').value,
-                role: document.getElementById('newRole').value
-            };
-
-            fetch('/api/users/invite', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(user)
-            }).then(response => {
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    response.text().then(text => alert(text));
-                }
-            });
-        }
-
-        function deleteUser(id) {
-            if (confirm('Are you sure you want to permanently revoke this access protocol?')) {
-                fetch(`/api/users/${id}`, { method: 'DELETE' })
-                    .then(response => { if (response.ok) window.location.reload(); });
-            }
-        }
-
-        // Sidebar mobile toggle
-        const sidebarEl = document.getElementById('sidebar');
-        const overlayEl = document.getElementById('sidebarOverlay');
-        const toggleBtn = document.getElementById('sidebarToggle');
-        
-        toggleBtn?.addEventListener('click', () => {
-            sidebarEl.classList.toggle('show');
-            overlayEl.classList.toggle('active');
-        });
-        
-        overlayEl?.addEventListener('click', () => {
-            sidebarEl.classList.remove('show');
-            overlayEl.classList.remove('active');
-        });
-    </script>
 </body>
 </html>

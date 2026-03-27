@@ -1,353 +1,254 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Threat Radar | CYBER-COMMAND</title>
+    <title>Intelligence Scan | CYBER-COMMAND</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cyber-command.css}">
     <style>
-        .terminal-panel {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 242, 255, 0.1);
+        .scanner-canvas {
+            width: 100%;
+            height: 400px;
+            background: rgba(0,0,0,0.2);
+            border-radius: var(--border-radius);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .scan-ring {
+            position: absolute;
+            border: 2px solid var(--accent-blue);
+            border-radius: 50%;
+            width: 300px;
+            height: 300px;
+            opacity: 0.1;
+            animation: ringPulse 4s infinite linear;
+        }
+        @keyframes ringPulse {
+            0% { transform: scale(0.5); opacity: 0.5; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+            top: 0;
+            animation: scanLine 3s infinite ease-in-out;
+            box-shadow: 0 0 15px var(--accent-blue);
+        }
+        @keyframes scanLine {
+            0% { top: 0% } 50% { top: 100% } 100% { top: 0% }
+        }
+        .terminal-output {
+            background: rgba(0,0,0,0.4);
             border-radius: 12px;
+            padding: 20px;
             font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-emerald);
             height: 300px;
             overflow-y: auto;
-            padding: 1.5rem;
-            font-size: 0.85rem;
-            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
         }
-        .terminal-entry { margin-bottom: 0.5rem; border-left: 2px solid transparent; padding-left: 12px; transition: all 0.2s; }
-        .terminal-entry:hover { border-left-color: var(--cyber-cyan); background: rgba(0, 242, 255, 0.05); }
-        .terminal-ts { color: rgba(0, 242, 255, 0.4); margin-right: 10px; }
-        
-        .scan-focus-area {
-            position: relative;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 100px;
-            padding: 6px;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .scan-focus-area:focus-within {
-            border-color: var(--cyber-cyan);
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
-            background: rgba(0, 242, 255, 0.05);
-        }
-        .scan-focus-area input {
-            background: transparent;
-            border: none;
-            color: white;
-            padding: 0.8rem 1.5rem;
-            width: 100%;
-            outline: none;
-        }
-
-        @keyframes laser-sweep {
-            0% { transform: translateY(-100%); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(300%); opacity: 0; }
-        }
-        .laser-scanner {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 2px;
-            background: var(--cyber-cyan);
-            box-shadow: 0 0 15px var(--cyber-cyan);
-            z-index: 10;
-            display: none;
-            animation: laser-sweep 2s infinite linear;
-        }
+        .terminal-line { margin-bottom: 4px; }
+        .terminal-line .time { color: var(--text-muted); margin-right: 10px; }
+        .terminal-line .prefix { color: var(--accent-blue); margin-right: 10px; }
     </style>
 </head>
-<body>
+<body class="fade-in">
 
-    <div class="hud-background"></div>
-    <div class="data-stream"></div>
-
-    <!-- Mobile Sidebar Overlay -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <!-- Ultramodern Sidebar -->
-    <aside class="cyber-sidebar" id="sidebar">
-        <div class="p-4 mb-4">
-            <a class="navbar-brand fw-900 text-uppercase d-flex align-items-center gap-2" href="/" style="color: var(--cyber-cyan); font-size: 1.2rem; text-decoration: none;">
-                <i class="bi bi-shield-lock-fill fs-3"></i> CYBER-COMMAND
-            </a>
-        </div>
-        
-        <nav class="flex-grow-1">
-            <a th:href="@{/dashboard}" class="nav-link-extra"><i class="bi bi-cpu me-3"></i> Neural Console</a>
-            <a th:href="@{/threat-scan}" class="nav-link-extra active"><i class="bi bi-radar me-3"></i> Threat Radar</a>
-            <a th:href="@{/mitigation-rules}" class="nav-link-extra"><i class="bi bi-shield-exclamation me-3"></i> Active Defense</a>
-            <a th:href="@{/authorized-users}" class="nav-link-extra"><i class="bi bi-people me-3"></i> Operator Registry</a>
-            <a th:href="@{/audit-logs}" class="nav-link-extra"><i class="bi bi-journal-text me-3"></i> System Audit</a>
-        </nav>
-
-        <div class="p-4 border-top border-secondary border-opacity-25">
-            <div class="d-flex align-items-center gap-3">
-                <div class="rounded-circle bg-info" style="width: 10px; height: 10px; box-shadow: 0 0 10px var(--cyber-cyan);"></div>
-                <span class="mono extra-small opacity-50" sec:authentication="name">SYS_ADMIN</span>
+    <div class="app-wrapper">
+        <!-- Sidebar (Same as Dashboard) -->
+        <aside class="sidebar">
+            <div class="d-flex align-items-center gap-3 mb-5 px-3">
+                <i class="bi bi-shield-lock-fill text-primary fs-3"></i>
+                <span class="fs-4 fw-800 text-white" style="letter-spacing: -1px;">CYBER-COMMAND</span>
             </div>
-            <form th:action="@{/logout}" method="post" class="mt-3">
-                <button type="submit" class="btn btn-outline-danger w-100 rounded-3 py-2 fw-bold small">TERMINATE_SESSION</button>
-            </form>
-        </div>
-    </aside>
+            <nav>
+                <a th:href="@{/dashboard}" class="nav-item"><i class="bi bi-speedometer2"></i> Executive Overview</a>
+                <a th:href="@{/threat-scan}" class="nav-item active"><i class="bi bi-radar"></i> Intelligence Scan</a>
+                <a th:href="@{/mitigation-rules}" class="nav-item"><i class="bi bi-shield-exclamation"></i> Active Defense</a>
+                <a th:href="@{/authorized-users}" class="nav-item"><i class="bi bi-people"></i> Operator Registry</a>
+                <a th:href="@{/audit-logs}" class="nav-item"><i class="bi bi-journal-text"></i> System Audit</a>
+            </nav>
+            <div class="position-absolute bottom-0 start-0 w-100 p-4">
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn-outline w-100 py-2 border-danger text-danger bg-danger bg-opacity-10 border-opacity-20 fs-7">
+                        <i class="bi bi-power me-2"></i> Terminate Session
+                    </button>
+                </form>
+            </div>
+        </aside>
 
-    <main class="main-wrap" style="margin-left: var(--sidebar-width); min-height: 100vh; padding: 2rem;">
-        
-        <!-- Mobile Toggle -->
-        <button class="sidebar-toggle mb-4 d-lg-none btn border-0 text-info" id="sidebarToggle">
-            <i class="bi bi-list fs-1"></i>
-        </button>
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="d-flex justify-content-between align-items-center mb-5">
+                <div>
+                    <h2 class="fw-800 text-white m-0">Intelligence Scan</h2>
+                    <p class="text-muted small">Deep-packet heuristics and neural vector analysis pulse.</p>
+                </div>
+                <div class="glass-card p-2">
+                    <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-20 px-3 py-2 fw-700 small">
+                        CORE_ENGINE: ACTIVE
+                    </span>
+                </div>
+            </header>
 
-        <header class="mb-5">
-            <span class="mono extra-small text-info opacity-75">RADAR://NEURAL_VECTOR_ANALYSIS</span>
-            <h2 class="fw-800 m-0">Threat Intelligence Analysis</h2>
-            <p class="text-muted small">Deploying advanced heuristics to intercept multidimensional attack vectors.</p>
-        </header>
+            <div class="row g-4">
+                <!-- Control Panel -->
+                <div class="col-lg-5">
+                    <div class="glass-card p-4 h-100">
+                        <div class="mb-5">
+                            <h5 class="fw-800 text-white mb-3">Analysis Vectors</h5>
+                            <p class="text-muted small">Select primary intelligence streams for the next scan pulse.</p>
+                        </div>
 
-        <div class="row g-4">
-            <!-- Scan Core -->
-            <div class="col-lg-8">
-                <div class="glass-panel p-4 mb-4 position-relative overflow-hidden">
-                    <div class="laser-scanner" id="laserScanner"></div>
-                    
-                    <div class="d-flex align-items-center justify-content-between mb-4">
-                        <h5 class="fw-800 m-0"><i class="bi bi-terminal text-info me-2"></i> Neural Analysis Terminal</h5>
-                        <span class="badge rounded-pill border border-info text-info mono extra-small px-3 py-2">HEURISTIC_CORE v5.0</span>
-                    </div>
+                        <form id="scanForm" th:action="@{/threat-scan}" method="post">
+                            <div class="mb-4">
+                                <label class="small fw-700 text-muted text-uppercase mb-2 d-block" style="letter-spacing: 0.1em;">Target Origin</label>
+                                <select name="target" class="form-select-premium" style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); color: white; padding: 14px; border-radius: 12px; width: 100%;" required>
+                                    <option value="Global">GLOBAL_NEURAL_CORE</option>
+                                    <option value="Regional">REGIONAL_ISOLATION</option>
+                                    <option value="Endpoint">ENDPOINT_SPECIFIC</option>
+                                </select>
+                            </div>
 
-                    <div class="scan-focus-area mb-4">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-search ms-3 text-info opacity-50"></i>
-                            <input type="text" id="scanInput" placeholder="Enter URL or suspicious hash for deep spectral analysis...">
-                            <button class="btn-elite px-4 py-2 me-1" id="scanBtn" onclick="runNeuralScan()">
-                                <i class="bi bi-shield-shaded me-2"></i> INITIATE_SCAN
+                            <div class="mb-5">
+                                <label class="small fw-700 text-muted text-uppercase mb-3 d-block" style="letter-spacing: 0.1em;">Protocol Layers</label>
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <div class="glass-card p-3 d-flex align-items-center gap-3">
+                                            <input type="checkbox" checked class="form-check-input bg-dark border-primary">
+                                            <span class="small fw-700 text-white-50">L7_HEURISTICS</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="glass-card p-3 d-flex align-items-center gap-3">
+                                            <input type="checkbox" checked class="form-check-input bg-dark border-primary">
+                                            <span class="small fw-700 text-white-50">TRAFFIC_SPECTRA</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="glass-card p-3 d-flex align-items-center gap-3">
+                                            <input type="checkbox" class="form-check-input bg-dark border-primary">
+                                            <span class="small fw-700 text-white-50">CRYPT_AUDIT</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="glass-card p-3 d-flex align-items-center gap-3">
+                                            <input type="checkbox" checked class="form-check-input bg-dark border-primary">
+                                            <span class="small fw-700 text-white-50">BEHAVIOR_AI</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="startBtn" class="btn-premium w-100 py-3 justify-content-center fs-6">
+                                <i class="bi bi-radar me-2"></i> INITIALIZE_PULSE
                             </button>
-                        </div>
-                    </div>
-
-                    <!-- HUD Results -->
-                    <div id="resultsHUD" class="d-none">
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <div class="p-3 bg-white bg-opacity-5 rounded-3 border border-white border-opacity-10">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="mono extra-small opacity-50">THREAT_PROBABILITY</span>
-                                        <span id="riskPct" class="fw-900 text-info">0.0%</span>
-                                    </div>
-                                    <div class="progress bg-dark" style="height: 8px; border-radius: 10px;">
-                                        <div id="riskBar" class="progress-bar" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="p-3 bg-white bg-opacity-5 rounded-3 border border-white border-opacity-10 h-100 d-flex align-items-center justify-content-between">
-                                    <span class="mono extra-small opacity-50">VERDICT_STATUS</span>
-                                    <span id="verdictBadge" class="badge rounded-pill px-4">AWAITING</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="findingsBox" class="d-none mb-4">
-                            <div class="p-3 bg-white bg-opacity-5 rounded-3 border border-info border-opacity-10">
-                                <h6 class="mono extra-small text-info mb-3">ANOMALY_LOG_DUMP</h6>
-                                <div id="findingsList" class="d-flex flex-column gap-2 small opacity-75"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="terminal-panel" id="terminal">
-                        <div class="opacity-30 mono">AWAITING_INPUT_SIGNAL... SYSTEM_IDLE</div>
+                        </form>
                     </div>
                 </div>
 
-                <!-- Historical Intelligence -->
-                <div class="glass-panel p-4">
-                    <h5 class="fw-800 mb-4"><i class="bi bi-clock-history text-info me-2"></i> Intelligence History</h5>
-                    <div class="table-responsive">
-                        <table class="table table-dark table-hover align-middle border-0">
-                            <thead class="small mono opacity-50">
-                                <tr>
-                                    <th class="border-0">TIMESTAMP</th>
-                                    <th class="border-0">PAYLOAD_FRAGMENT</th>
-                                    <th class="border-0">PROBABILITY</th>
-                                    <th class="border-0">VERDICT</th>
-                                </tr>
-                            </thead>
-                            <tbody id="scanHistory" class="small">
-                                <tr th:each="scan : ${scans}" class="border-bottom border-secondary border-opacity-10">
-                                    <td class="py-3 mono opacity-50" th:text="${#temporals.format(scan.scanTimestamp, 'HH:mm:ss')}">12:00:00</td>
-                                    <td class="py-3 fw-bold" th:text="${#strings.length(scan.payload) > 40 ? #strings.substring(scan.payload,0,40)+'...' : scan.payload}">api/v1/auth</td>
-                                    <td class="py-3 fw-900 text-info" th:text="${scan.riskScore + '%'}">45%</td>
-                                    <td class="py-3">
-                                        <span class="badge rounded-pill border px-3 extra-small" 
-                                              th:classappend="${scan.riskLevel == 'HIGH' ? 'border-danger text-danger' : 'border-success text-success'}"
-                                              th:text="${scan.riskLevel}">SECURE</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <!-- Visualization Panel -->
+                <div class="col-lg-7">
+                    <div class="glass-card p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-800 text-white m-0">Real-time Visualization</h5>
+                            <div class="mono small text-emerald fw-700" id="scanStatus">AWAITING_INPUT</div>
+                        </div>
+
+                        <div class="scanner-canvas mb-4">
+                            <div class="scan-line" id="scanLine" style="display: none;"></div>
+                            <div class="scan-ring" id="scanRing1"></div>
+                            <div class="scan-ring" id="scanRing2" style="animation-delay: -2s;"></div>
+                            
+                            <img th:src="@{/images/neural_network.png}" style="opacity: 0.05; position: absolute; max-width: 80%; transform: rotate(45deg);">
+                            
+                            <div id="scanResult" class="text-center position-relative z-1" style="display: none;">
+                                <div class="badge bg-emerald text-white bg-opacity-10 border border-emerald border-opacity-20 mb-3 px-3 py-2 fw-700 p-2 fs-6">
+                                    <i class="bi bi-shield-check me-2"></i> VERIFIED_CLEAN
+                                </div>
+                                <div class="text-white fs-4 fw-800">ZERO_THREATS_DETECTED</div>
+                            </div>
+                            
+                            <div id="awaitingText" class="text-center text-muted mono fw-700 opacity-20">
+                                INITIALIZE_CONNECTION_FOR_TELEMETRY
+                            </div>
+                        </div>
+
+                        <div class="terminal-output" id="terminal">
+                            <div class="terminal-line"><span class="time">[00:00:00]</span> <span class="prefix">SYS:</span> READY_FOR_INSTRUCTION</div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </main>
+    </div>
 
-            <!-- Side Metrics -->
-            <div class="col-lg-4">
-                <div class="glass-panel p-4 mb-4 tactical-glow">
-                    <h6 class="fw-800 text-info mb-4">Neural Engine Status</h6>
-                    <div class="d-flex flex-column gap-4">
-                        <div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="extra-small opacity-75">Spectral Entropy</span>
-                                <span class="mono extra-small text-info">OPTIMAL</span>
-                            </div>
-                            <div class="progress bg-dark" style="height: 4px;"><div class="progress-bar bg-info" style="width: 88%"></div></div>
-                        </div>
-                        <div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="extra-small opacity-75">Packet Inspection</span>
-                                <span class="mono extra-small text-success">ENFORCED</span>
-                            </div>
-                            <div class="progress bg-dark" style="height: 4px;"><div class="progress-bar bg-success" style="width: 95%"></div></div>
-                        </div>
-                        <div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="extra-small opacity-75">Sync Latency</span>
-                                <span class="mono extra-small text-purple" style="color: var(--cyber-purple);">4ms</span>
-                            </div>
-                            <div class="progress bg-dark" style="height: 4px;"><div class="progress-bar" style="width: 99%; background: var(--cyber-purple);"></div></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-panel p-4 border-info border-opacity-20">
-                    <h6 class="fw-800 text-info mb-3">Shield Protocol</h6>
-                    <p class="small opacity-50 mb-4">All neural verdicts are synchronized with the <span class="text-white">Zero-Trust Intelligence</span> layer for instant global mitigation.</p>
-                    <a th:href="@{/mitigation-rules}" class="btn btn-outline-info btn-sm w-100 rounded-pill py-2 fw-bold">CONFIGURE_RADAR</a>
-                </div>
-            </div>
-        </div>
-    </main>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        const scanForm = document.getElementById('scanForm');
+        const startBtn = document.getElementById('startBtn');
         const terminal = document.getElementById('terminal');
-        const scanBtn = document.getElementById('scanBtn');
-        const scanner = document.getElementById('laserScanner');
+        const scanLine = document.getElementById('scanLine');
+        const scanStatus = document.getElementById('scanStatus');
+        const scanResult = document.getElementById('scanResult');
+        const awaitingText = document.getElementById('awaitingText');
 
-        function addLog(msg, type = 'info') {
-            const entry = document.createElement('div');
-            entry.className = 'terminal-entry';
-            const color = type === 'success' ? '#00ffa3' : type === 'warning' ? '#ff9e00' : '#00f2ff';
-            entry.innerHTML = `<span class="terminal-ts">[${new Date().toLocaleTimeString()}]</span> <span style="color:${color}">${msg}</span>`;
-            terminal.appendChild(entry);
+        function addLog(msg, prefix = 'SYS:') {
+            const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.innerHTML = `<span class="time">[${time}]</span> <span class="prefix">${prefix}</span> ${msg}`;
+            terminal.appendChild(line);
             terminal.scrollTop = terminal.scrollHeight;
         }
 
-        async function runNeuralScan() {
-            const val = document.getElementById('scanInput').value.trim();
-            if(!val) return;
+        scanForm.onsubmit = (e) => {
+            e.preventDefault();
+            const target = e.target.target.value;
+            
+            startBtn.disabled = true;
+            startBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> ANALYZING...';
+            scanLine.style.display = 'block';
+            awaitingText.style.display = 'none';
+            scanResult.style.display = 'none';
+            scanStatus.innerText = 'INITIALIZING_DEEP_SCAN';
+            scanStatus.classList.replace('text-emerald', 'text-primary');
 
-            terminal.innerHTML = '';
-            document.getElementById('resultsHUD').classList.remove('d-none');
-            document.getElementById('findingsBox').classList.add('d-none');
-            document.getElementById('findingsList').innerHTML = '';
-            scanBtn.disabled = true;
-            scanner.style.display = 'block';
+            addLog(`Establishing secure link to ${target} node...`);
+            
+            setTimeout(() => {
+                addLog('Neural weights loaded. Protocol L7 decryption active.');
+                scanStatus.innerText = 'NEURAL_VECTOR_ANALYSIS';
+            }, 1000);
 
-            const stages = [
-                "INITIALIZING_NEURAL_CLUSTER...",
-                "HARVESTING_GLOBAL_TOPOLOGY...",
-                "RESOLVING_DNS_METADATA...",
-                "VALIDATING_TLS_CERTIFICATE_CHAIN...",
-                "PARSING_PAYLOAD_ENTITY...",
-                "EXECUTING_SPECTRAL_ENTROPY_CHECK...",
-                "SCRAMBLING_HUFFMAN_ENCODING...",
-                "SYNCING_WITH_GLOBAL_THREAT_FEEDS...",
-                "COMPUTING_WEIGHTED_RISK_INDEX..."
-            ];
+            setTimeout(() => {
+                addLog('Scanning packet headers for anomalies...');
+                addLog('Heuristics check: 84% complete', 'AI:');
+            }, 2000);
 
-            for(let i=0; i<stages.length; i++) {
-                addLog(stages[i]);
-                document.getElementById('riskBar').style.width = `${(i+1)*10}%`;
-                document.getElementById('riskPct').innerText = `${((i+1)*9.8).toFixed(1)}%`;
-                await new Promise(r => setTimeout(r, 600));
-            }
+            setTimeout(() => {
+                addLog('Pattern matching against known threat database...');
+                addLog('Entropy analysis: STABLE', 'SYS:');
+            }, 3500);
 
-            try {
-                const csrfMeta = document.querySelector('meta[name="_csrf"]');
-                const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
-                const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
-                if (csrfMeta && csrfHeaderMeta) headers[csrfHeaderMeta.content] = csrfMeta.content;
-                
-                const response = await fetch('/api/scans/analyze', {
-                    method: 'POST',
-                    headers: headers,
-                    body: `payload=${encodeURIComponent(val)}`
-                });
-
-                if(response.ok) {
-                    const res = await response.json();
-                    
-                    addLog('VERDICT_RECEIVED: Analysis Finalized.', 'success');
-                    
-                    document.getElementById('riskBar').style.width = `${res.threatScore}%`;
-                    document.getElementById('riskPct').innerText = `${res.threatScore.toFixed(1)}%`;
-                    
-                    const badge = document.getElementById('verdictBadge');
-                    badge.innerText = res.riskRating;
-                    
-                    if(res.threatScore > 60) {
-                        document.getElementById('riskBar').className = 'progress-bar bg-danger';
-                        badge.className = 'badge rounded-pill px-4 bg-danger';
-                        addLog('CRITICAL_THREAT_DETECTED!', 'warning');
-                    } else {
-                        document.getElementById('riskBar').className = 'progress-bar bg-info shadow-info';
-                        badge.className = 'badge rounded-pill px-4 bg-success';
-                        addLog('NO_THREAT_FOUND: Entity Verified.', 'success');
-                    }
-
-                    if(res.findings && res.findings.length > 0) {
-                        document.getElementById('findingsBox').classList.remove('d-none');
-                        res.findings.forEach(f => {
-                            const d = document.createElement('div');
-                            d.innerText = `> ${f}`;
-                            document.getElementById('findingsList').appendChild(d);
-                        });
-                    }
-
-                    // Append row
-                    const row = document.createElement('tr');
-                    row.className = 'border-bottom border-secondary border-opacity-10';
-                    row.innerHTML = `
-                        <td class="py-3 mono opacity-50">Just Now</td>
-                        <td class="py-3 fw-bold">${val.substring(0,40)}</td>
-                        <td class="py-3 fw-900 text-info">${res.threatScore.toFixed(1)}%</td>
-                        <td class="py-3"><span class="badge rounded-pill border px-3 extra-small ${res.threatScore > 60 ? 'border-danger text-danger' : 'border-success text-success'}">${res.riskRating}</span></td>
-                    `;
-                    document.getElementById('scanHistory').prepend(row);
-
-                }
-            } catch (e) {
-                addLog('CRITICAL_CONNECTION_FAILURE: Neural Link Interrupted', 'warning');
-            } finally {
-                scanBtn.disabled = false;
-                scanner.style.display = 'none';
-            }
-        }
-
-        // Sidebar logic
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const toggle = document.getElementById('sidebarToggle');
-
-        if(toggle) toggle.addEventListener('click', () => { sidebar.classList.add('show'); overlay.classList.add('active'); });
-        if(overlay) overlay.addEventListener('click', () => { sidebar.classList.remove('show'); overlay.classList.remove('active'); });
+            setTimeout(() => {
+                addLog('SCAN_COMPLETE. No malicious vectors identified.');
+                scanLine.style.display = 'none';
+                scanResult.style.display = 'block';
+                scanStatus.innerText = 'STATION_SECURE';
+                scanStatus.classList.replace('text-primary', 'text-emerald');
+                startBtn.disabled = false;
+                startBtn.innerHTML = '<i class="bi bi-radar me-2"></i> INITIALIZE_PULSE';
+            }, 5000);
+        };
     </script>
 </body>
 </html>

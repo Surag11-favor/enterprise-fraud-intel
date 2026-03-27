@@ -3,67 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBER-COMMAND | INITIALIZE</title>
+    <title>SECURE ACCESS | CYBER-COMMAND</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cyber-command.css}">
     <style>
-        .auth-wrapper {
+        .auth-split-container {
             min-height: 100vh;
+            display: flex;
+        }
+        .auth-brand-side {
+            flex: 1.2;
+            background: url('/images/security_shield.png') center/cover no-repeat;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 80px;
+        }
+        .auth-brand-side::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(5,5,8,0.95) 0%, rgba(59, 130, 246, 0.4) 100%);
+        }
+        .auth-form-side {
+            flex: 1;
+            background: var(--bg-darker);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        .auth-form-wrapper {
+            width: 100%;
+            max-width: 440px;
+        }
+        .brand-content {
             position: relative;
-            z-index: 5;
-            padding: 2rem;
+            z-index: 2;
+            max-width: 500px;
         }
-        .form-control-glass {
-            background: rgba(0,0,0,0.4);
+        .form-input-premium {
+            background: rgba(255,255,255,0.02);
             border: 1px solid var(--glass-border);
-            color: #fff;
-            padding: 1rem;
+            color: white;
+            padding: 16px 20px;
             border-radius: 12px;
-            font-size: 1.1rem;
+            width: 100%;
+            transition: var(--transition);
         }
-        .form-control-glass:focus {
-            background: rgba(0,243,255,0.05);
-            border-color: var(--neon-cyan);
-            color: #fff;
-            box-shadow: 0 0 20px rgba(0,243,255,0.2);
+        .form-input-premium:focus {
+            background: rgba(255,255,255,0.05);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+        @media (max-width: 991px) {
+            .auth-brand-side { display: none; }
         }
     </style>
 </head>
-<body>
-    <div class="orbital-glow"></div>
-    <div class="orbital-glow-2"></div>
-    
-    <div class="auth-wrapper">
-        <div class="glass-panel p-5" style="width: 100%; max-width: 500px;">
-            <div class="text-center mb-5">
-                <i class="bi bi-hexagon-fill display-3" style="color: var(--neon-cyan); text-shadow: 0 0 20px var(--neon-cyan);"></i>
-                <h2 class="fw-900 mt-3 text-white" style="letter-spacing: 2px;">SECURE LOGIN</h2>
-            </div>
+<body class="fade-in">
 
-            <div th:if="${param.error}" class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-3 p-3 mb-4 d-flex align-items-center gap-2">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-                <span class="small fw-bold">Invalid credentials. Auth denied.</span>
-            </div>
-
-            <form th:action="@{/login}" method="post">
-                <div class="mb-4">
-                    <label class="form-label" style="color: var(--neon-cyan); font-weight: 800; letter-spacing: 1px;">CLEARANCE ID</label>
-                    <input type="text" name="username" class="form-control form-control-glass" required autofocus placeholder="Enter ID">
+    <div class="auth-split-container">
+        <!-- Brand Side -->
+        <div class="auth-brand-side">
+            <div class="brand-content">
+                <a th:href="@{/}" class="d-flex align-items-center gap-2 text-decoration-none mb-5">
+                    <i class="bi bi-shield-lock-fill text-primary display-4"></i>
+                    <span class="fs-2 fw-800 text-white" style="letter-spacing: -2px;">CYBER-COMMAND</span>
+                </a>
+                <h1 class="display-3 fw-800 text-white mb-4">Elite <br><span class="gradient-text">Protection</span></h1>
+                <p class="text-white-50 fs-5 mb-5">Access the most sophisticated fraud intelligence engine ever deployed for the enterprise.</p>
+                <div class="glass-card p-4" style="background: rgba(255,255,255,0.05);">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-shield-shaded text-primary fs-2"></i>
+                        <div>
+                            <div class="text-white fw-700">QUANTUM_ARMOR v5.0</div>
+                            <div class="text-white-50 small mono">ENCRYPTING CONNECTION...</div>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Form Side -->
+        <div class="auth-form-side">
+            <div class="auth-form-wrapper">
                 <div class="mb-5">
-                    <label class="form-label" style="color: var(--neon-cyan); font-weight: 800; letter-spacing: 1px;">PASSCODE</label>
-                    <input type="password" name="password" class="form-control form-control-glass" required placeholder="••••••••">
+                    <h2 class="fw-800 text-white mb-2">Initialize Session</h2>
+                    <p class="text-muted">Enter your secure clearance credentials.</p>
                 </div>
-                <button type="submit" class="btn-ultramodern w-100 border-0" style="padding: 1.2rem;">INITIALIZE SESSION</button>
-                <div class="text-center mt-4">
-                    <a href="/register" style="color: var(--text-dim); text-decoration: none; font-weight: 600;">Request New Access Clearance</a>
+
+                <div th:if="${param.error}" class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-3 p-3 mb-4 d-flex align-items-center gap-3">
+                    <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                    <span class="small fw-600">INVALID CREDENTIALS. ACCESS DENIED.</span>
                 </div>
-            </form>
+
+                <form th:action="@{/login}" method="post">
+                    <div class="mb-4">
+                        <label class="small fw-700 text-muted text-uppercase mb-2 d-block" style="letter-spacing: 0.1em;">Clearance ID</label>
+                        <input type="text" name="username" class="form-input-premium" placeholder="specter_01" required autofocus>
+                    </div>
+                    <div class="mb-5">
+                        <label class="small fw-700 text-muted text-uppercase mb-2 d-block" style="letter-spacing: 0.1em;">Passcode</label>
+                        <input type="password" name="password" class="form-input-premium" placeholder="••••••••" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-premium w-100 py-3 justify-content-center fs-6 mb-4">
+                        Authenticate <i class="bi bi-arrow-right"></i>
+                    </button>
+
+                    <div class="text-center">
+                        <span class="text-muted small">Need clearance?</span>
+                        <a th:href="@{/register}" class="text-primary text-decoration-none small fw-700 ms-1">REQUEST ACCESS</a>
+                    </div>
+                </form>
+                
+                <div class="mt-5 pt-5 text-center text-muted extra-small mono opacity-50">
+                    <i class="bi bi-fingerprint me-2"></i> BIOMETRIC_LINK_PENDING_SYNC
+                </div>
+            </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

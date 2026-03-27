@@ -3,66 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBER-COMMAND | PROVISION</title>
+    <title>REQUEST CLEARANCE | CYBER-COMMAND</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cyber-command.css}">
     <style>
-        .auth-wrapper {
+        .auth-split-container {
             min-height: 100vh;
+            display: flex;
+        }
+        .auth-brand-side {
+            flex: 1.2;
+            background: url('/images/neural_network.png') center/cover no-repeat;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 80px;
+        }
+        .auth-brand-side::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(5,5,8,0.95) 0%, rgba(139, 92, 246, 0.4) 100%);
+        }
+        .auth-form-side {
+            flex: 1;
+            background: var(--bg-darker);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        .auth-form-wrapper {
+            width: 100%;
+            max-width: 440px;
+        }
+        .brand-content {
             position: relative;
-            z-index: 5;
-            padding: 2rem;
+            z-index: 2;
+            max-width: 500px;
         }
-        .form-control-glass {
-            background: rgba(0,0,0,0.4);
+        .form-input-premium {
+            background: rgba(255,255,255,0.02);
             border: 1px solid var(--glass-border);
-            color: #fff;
-            padding: 1rem;
+            color: white;
+            padding: 16px 20px;
             border-radius: 12px;
-            font-size: 1.1rem;
+            width: 100%;
+            transition: var(--transition);
         }
-        .form-control-glass:focus {
-            background: rgba(0,243,255,0.05);
-            border-color: var(--neon-cyan);
-            color: #fff;
-            box-shadow: 0 0 20px rgba(0,243,255,0.2);
+        .form-input-premium:focus {
+            background: rgba(255,255,255,0.05);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            outline: none;
         }
-        option { background: var(--bg-deep); color: white; }
+        .form-select-premium {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            width: 100%;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1.25rem center;
+            background-size: 16px 12px;
+        }
+        .form-select-premium:focus {
+            background-color: rgba(255,255,255,0.05);
+            border-color: var(--accent-blue);
+            outline: none;
+        }
+        option { background: var(--bg-dark); color: white; }
+        @media (max-width: 991px) {
+            .auth-brand-side { display: none; }
+        }
     </style>
 </head>
-<body>
-    <div class="orbital-glow"></div>
-    <div class="orbital-glow-2"></div>
-    
-    <div class="auth-wrapper">
-        <div class="glass-panel p-5" style="width: 100%; max-width: 500px;">
-            <div class="text-center mb-5">
-                <i class="bi bi-shield-plus display-3" style="color: var(--neon-purple); text-shadow: 0 0 20px var(--neon-purple);"></i>
-                <h2 class="fw-900 mt-3 text-white" style="letter-spacing: 2px;">PROVISION CORE</h2>
+<body class="fade-in">
+
+    <div class="auth-split-container">
+        <!-- Brand Side -->
+        <div class="auth-brand-side">
+            <div class="brand-content">
+                <a th:href="@{/}" class="d-flex align-items-center gap-2 text-decoration-none mb-5">
+                    <i class="bi bi-shield-lock-fill text-primary display-4"></i>
+                    <span class="fs-2 fw-800 text-white" style="letter-spacing: -2px;">CYBER-COMMAND</span>
+                </a>
+                <h1 class="display-3 fw-800 text-white mb-4">Neural <br><span class="gradient-text">Matrix</span></h1>
+                <p class="text-white-50 fs-5 mb-5">Provision your secure core identity and join the next generation of enterprise tactical defense.</p>
+                <div class="glass-card p-4" style="background: rgba(255,255,255,0.05);">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-cpu-fill text-primary fs-2"></i>
+                        <div>
+                            <div class="text-white fw-700">NEURAL_VERIFY v2.4</div>
+                            <div class="text-white-50 small mono">SYNCHRONIZING GENETIC HASH...</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <form th:action="@{/register}" th:object="${user}" method="post">
-                <div class="mb-4">
-                    <label class="form-label" style="color: var(--neon-cyan); font-weight: 800; letter-spacing: 1px;">CLEARANCE ID</label>
-                    <input type="text" th:field="*{username}" class="form-control form-control-glass" required autofocus>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label" style="color: var(--neon-cyan); font-weight: 800; letter-spacing: 1px;">NEW PASSCODE</label>
-                    <input type="password" th:field="*{password}" class="form-control form-control-glass" required>
-                </div>
+        </div>
+
+        <!-- Form Side -->
+        <div class="auth-form-side">
+            <div class="auth-form-wrapper">
                 <div class="mb-5">
-                    <label class="form-label" style="color: var(--neon-cyan); font-weight: 800; letter-spacing: 1px;">ACCESS TIER</label>
-                    <select th:field="*{role}" class="form-select form-control-glass">
-                        <option value="USER">TACTICAL OPERATOR</option>
-                        <option value="ADMIN">SYSTEM SUPREME</option>
-                    </select>
+                    <h2 class="fw-800 text-white mb-2">Request Access</h2>
+                    <p class="text-muted">Register for elite system clearance.</p>
                 </div>
-                <button type="submit" class="btn-ultramodern w-100 border-0" style="padding: 1.2rem;">PROVISION NOW</button>
-            </form>
+
+                <form th:action="@{/register}" th:object="${user}" method="post">
+                    <div class="mb-4">
+                        <label class="small fw-700 text-muted text-uppercase mb-2 d-block" style="letter-spacing: 0.1em;">Codename (ID)</label>
+                        <input type="text" th:field="*{username}" class="form-input-premium" placeholder="specter_01" required autofocus>
+                    </div>
+                    <div class="mb-4">
+                        <label class="small fw-700 text-muted text-uppercase mb-2 d-block" style="letter-spacing: 0.1em;">Passcode</label>
+                        <input type="password" th:field="*{password}" class="form-input-premium" placeholder="••••••••" required>
+                    </div>
+                    <div class="mb-5">
+                        <label class="small fw-700 text-muted text-uppercase mb-2 d-block" style="letter-spacing: 0.1em;">Clearance Tier</label>
+                        <select th:field="*{role}" class="form-select-premium">
+                            <option value="USER">TACTICAL OPERATOR</option>
+                            <option value="ADMIN">SYSTEM SUPREME (ROOT)</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn-premium w-100 py-3 justify-content-center fs-6 mb-4">
+                        Provision Core <i class="bi bi-shield-plus"></i>
+                    </button>
+
+                    <div class="text-center">
+                        <span class="text-muted small">Already cleared?</span>
+                        <a th:href="@{/login}" class="text-primary text-decoration-none small fw-700 ms-1">ENTER HUB</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -3,192 +3,289 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | CYBER-COMMAND</title>
+    <title>Executive Dashboard | CYBER-COMMAND</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/cyber-command.css}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+        .quick-action-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            text-align: center;
+        }
+        .quick-action-btn:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--accent-blue);
+            transform: translateY(-5px);
+            color: var(--accent-blue);
+        }
+        .avatar-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+        }
+    </style>
 </head>
-<body>
+<body class="fade-in">
 
-    <div class="hud-background"></div>
-    <div class="data-stream"></div>
-
-    <!-- Mobile Sidebar Overlay -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <!-- Ultramodern Sidebar -->
-    <aside class="cyber-sidebar" id="sidebar">
-        <div class="p-4 mb-4">
-            <a class="navbar-brand fw-900 text-uppercase d-flex align-items-center gap-2" href="/" style="color: var(--cyber-cyan); font-size: 1.2rem; text-decoration: none;">
-                <i class="bi bi-shield-lock-fill fs-3"></i> CYBER-COMMAND
-            </a>
-        </div>
-        
-        <nav class="flex-grow-1">
-            <a th:href="@{/dashboard}" class="nav-link-extra active"><i class="bi bi-cpu me-3"></i> Neural Console</a>
-            <a th:href="@{/threat-scan}" class="nav-link-extra"><i class="bi bi-radar me-3"></i> Threat Radar</a>
-            <a th:href="@{/mitigation-rules}" class="nav-link-extra"><i class="bi bi-shield-exclamation me-3"></i> Active Defense</a>
-            <a th:href="@{/authorized-users}" class="nav-link-extra"><i class="bi bi-people me-3"></i> Operator Registry</a>
-            <a th:href="@{/audit-logs}" class="nav-link-extra"><i class="bi bi-journal-text me-3"></i> System Audit</a>
-        </nav>
-
-        <div class="p-4 border-top border-secondary border-opacity-25">
-            <div class="d-flex align-items-center gap-3">
-                <div class="rounded-circle bg-info" style="width: 10px; height: 10px; box-shadow: 0 0 10px var(--cyber-cyan);"></div>
-                <span class="mono extra-small opacity-50" sec:authentication="name">SYS_ADMIN</span>
+    <div class="app-wrapper">
+        <!-- Premium Sidebar -->
+        <aside class="sidebar">
+            <div class="d-flex align-items-center gap-3 mb-5 px-3">
+                <i class="bi bi-shield-lock-fill text-primary fs-3"></i>
+                <span class="fs-4 fw-800 text-white" style="letter-spacing: -1px;">CYBER-COMMAND</span>
             </div>
-            <form th:action="@{/logout}" method="post" class="mt-3">
-                <button type="submit" class="btn btn-outline-danger w-100 rounded-3 py-2 fw-bold small">TERMINATE_SESSION</button>
-            </form>
-        </div>
-    </aside>
 
-    <main class="main-wrap" style="margin-left: var(--sidebar-width); min-height: 100vh; padding: 2rem;">
-        
-        <!-- Mobile Toggle -->
-        <button class="sidebar-toggle mb-4 d-lg-none btn border-0 text-info" id="sidebarToggle">
-            <i class="bi bi-list fs-1"></i>
-        </button>
+            <nav>
+                <a th:href="@{/dashboard}" class="nav-item active"><i class="bi bi-speedometer2"></i> Executive Overview</a>
+                <a th:href="@{/threat-scan}" class="nav-item"><i class="bi bi-radar"></i> Intelligence Scan</a>
+                <a th:href="@{/mitigation-rules}" class="nav-item"><i class="bi bi-shield-exclamation"></i> Active Defense</a>
+                <a th:href="@{/authorized-users}" class="nav-item"><i class="bi bi-people"></i> Operator Registry</a>
+                <a th:href="@{/audit-logs}" class="nav-item"><i class="bi bi-journal-text"></i> System Audit</a>
+            </nav>
 
-        <header class="d-flex justify-content-between align-items-center mb-5">
-            <div>
-                <span class="mono extra-small text-info opacity-75">SESSION://CYBER_COMMAND_ROOT</span>
-                <h2 class="fw-800 m-0">Neural Intelligence Console</h2>
-            </div>
-            <div class="d-none d-md-block">
-                <div class="glass-panel py-2 px-4 mono small border-info border-opacity-25">
-                    <i class="bi bi-clock me-2 text-info"></i> <span id="liveClock">00:00:00</span>
-                </div>
-            </div>
-        </header>
-
-        <!-- Extraordinary Stat Grid -->
-        <div class="row g-4 mb-5">
-            <div class="col-md-3">
-                <div class="glass-panel stat-card tactical-glow h-100">
-                    <div class="mono extra-small text-info mb-2">PULSE_ACTIVITY</div>
-                    <div class="stat-val" th:text="${totalScans ?: '0'}">0</div>
-                    <div class="extra-small opacity-50">HEURISTIC_OPS</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="glass-panel stat-card tactical-glow h-100">
-                    <div class="mono extra-small text-danger mb-2">NEUTRALIZED_VECTORS</div>
-                    <div class="stat-val text-danger" th:text="${blockedThreats ?: '0'}">0</div>
-                    <div class="extra-small opacity-50">CRITICAL_MITIGATION</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="glass-panel stat-card tactical-glow h-100">
-                    <div class="mono extra-small text-success mb-2">AUTH_OPERATORS</div>
-                    <div class="stat-val text-success" th:text="${activeUsers ?: '0'}">0</div>
-                    <div class="extra-small opacity-50">ROOT_VERIFIED</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="glass-panel stat-card tactical-glow h-100">
-                    <div class="mono extra-small text-purple mb-2" style="color: var(--cyber-purple);">NEURAL_ACCURACY</div>
-                    <div class="stat-val" style="color: var(--cyber-purple);">99.8<span class="fs-4">%</span></div>
-                    <div class="extra-small opacity-50">BEYOND_QUANTUM</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row g-4">
-            <!-- Intelligence Matrix -->
-            <div class="col-lg-8">
-                <div class="glass-panel p-4 h-100">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="fw-800 m-0"><i class="bi bi-activity text-info me-2"></i> Intelligence Matrix</h5>
-                        <a th:href="@{/audit-logs}" class="mono extra-small text-info text-decoration-none border-bottom border-info border-opacity-25 pb-1">VIEW_ALL_LOGS</a>
+            <div class="position-absolute bottom-0 start-0 w-100 p-4">
+                <div class="glass-card p-3 mb-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avatar-box" th:text="${#strings.substring(#authentication.name, 0, 1).toUpperCase()}">S</div>
+                        <div class="overflow-hidden">
+                            <div class="text-white small fw-700 text-truncate" sec:authentication="name">SYS_ADMIN</div>
+                            <div class="extra-small text-muted fw-600">PREMIUM_LAYER</div>
+                        </div>
                     </div>
-                    
-                    <div class="table-responsive">
-                        <table class="table table-dark table-hover align-middle border-0">
-                            <thead class="small mono opacity-50 text-uppercase">
-                                <tr>
-                                    <th class="border-0">Timestamp</th>
-                                    <th class="border-0">Operator</th>
-                                    <th class="border-0">Action_Hash</th>
-                                    <th class="border-0">Result</th>
-                                </tr>
-                            </thead>
-                            <tbody class="small">
-                                <tr th:each="log : ${recentLogs}" class="border-bottom border-secondary border-opacity-10">
-                                    <td class="py-3 mono" th:text="${#temporals.format(log.timestamp, 'HH:mm:ss')}">12:00:00</td>
-                                    <td class="py-3 fw-bold" th:text="${log.performedBy}">SYSTEM</td>
-                                    <td class="py-3 opacity-75" th:text="${log.action}">DATA_ENCRYPTION</td>
-                                    <td class="py-3">
-                                        <span class="badge rounded-pill border border-info text-info mono extra-small px-3">PROTECTED</span>
-                                    </td>
-                                </tr>
-                                <tr th:if="${#lists.isEmpty(recentLogs)}" class="text-center">
-                                    <td colspan="4" class="py-5 opacity-50 mono">WAITING_FOR_MATRIX_FEED...</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                </div>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn-outline w-100 py-2 border-danger text-danger bg-danger bg-opacity-10 border-opacity-20 fs-7">
+                        <i class="bi bi-power me-2"></i> Terminate Session
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="d-flex justify-content-between align-items-center mb-5">
+                <div>
+                    <h2 class="fw-800 text-white m-0">Command Interface</h2>
+                    <p class="text-muted small">Real-time enterprise threat posture and intelligence matrix.</p>
+                </div>
+                <div class="d-flex align-items-center gap-4">
+                    <div class="text-end d-none d-md-block">
+                        <div class="small fw-700 text-white" id="liveDate">March 27, 2026</div>
+                        <div class="extra-small text-muted mono" id="liveTime">00:00:00 UTC</div>
+                    </div>
+                    <div class="glass-card p-2 d-flex gap-2">
+                        <button class="btn btn-premium p-2 rounded-3"><i class="bi bi-bell-fill fs-5"></i></button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Stat Grid -->
+            <div class="row g-4 mb-5">
+                <div class="col-xl-3 col-md-6">
+                    <div class="glass-card stat-widget">
+                        <div class="stat-label">Total Scans</div>
+                        <div class="stat-value text-white" th:text="${totalScans ?: '1,284'}">0</div>
+                        <div class="stat-delta delta-up"><i class="bi bi-arrow-up-short"></i> +12% this week</div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="glass-card stat-widget">
+                        <div class="stat-label">Blocked Threats</div>
+                        <div class="stat-value text-rose" th:text="${blockedThreats ?: '432'}">0</div>
+                        <div class="stat-delta delta-up"><i class="bi bi-shield-check"></i> Integrated mitigation</div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="glass-card stat-widget">
+                        <div class="stat-label">Active Operators</div>
+                        <div class="stat-value text-emerald" th:text="${activeUsers ?: '12'}">0</div>
+                        <div class="stat-delta text-muted"><i class="bi bi-geo-alt"></i> 4 Global Hubs</div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="glass-card stat-widget" style="border-color: var(--accent-purple);">
+                        <div class="stat-label">Neural Accuracy</div>
+                        <div class="stat-value gradient-text" style="-webkit-text-fill-color: initial; background: linear-gradient(135deg, white, var(--accent-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">99.9%</div>
+                        <div class="stat-delta text-muted"><i class="bi bi-cpu"></i> Quantum Edge</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Quick Pulse -->
-            <div class="col-lg-4">
-                <div class="glass-panel p-4 h-100 border-info border-opacity-25">
-                    <h5 class="fw-800 mb-4"><i class="bi bi-shield-shaded text-info me-2"></i> Tactical Status</h5>
-                    <div class="d-flex flex-column gap-3 mb-5">
-                        <div class="p-3 bg-white bg-opacity-5 rounded-3 d-flex justify-content-between align-items-center border border-white border-opacity-10">
-                            <span class="small opacity-75">Quantum Firewall</span>
-                            <span class="badge bg-success bg-opacity-75 rounded-pill px-3">ENFORCED</span>
+            <!-- Intelligence Analytics -->
+            <div class="row g-4 mb-5">
+                <div class="col-lg-8">
+                    <div class="glass-card p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-5">
+                            <h5 class="fw-800 text-white m-0 d-flex align-items-center gap-2">
+                                <i class="bi bi-activity text-primary"></i> Threat Trajectory
+                            </h5>
+                            <div class="dropdown">
+                                <button class="btn btn-outline border-0 py-1 px-3 fs-7 bg-white bg-opacity-5" type="button">Last 24 Hours</button>
+                            </div>
                         </div>
-                        <div class="p-3 bg-white bg-opacity-5 rounded-3 d-flex justify-content-between align-items-center border border-white border-opacity-10">
-                            <span class="small opacity-75">Neural Scraper</span>
-                            <span class="badge bg-info bg-opacity-75 rounded-pill px-3">CALIBRATED</span>
-                        </div>
-                        <div class="p-3 bg-white bg-opacity-5 rounded-3 d-flex justify-content-between align-items-center border border-white border-opacity-10">
-                            <span class="small opacity-75">Zero-Trust Protocol</span>
-                            <span class="badge bg-purple bg-opacity-75 rounded-pill px-3" style="background-color: var(--cyber-purple) !important;">ACTIVE</span>
+                        <div class="chart-container">
+                            <canvas id="threatChart"></canvas>
                         </div>
                     </div>
-                    <a th:href="@{/threat-scan}" class="btn-elite w-100 text-center text-decoration-none d-block py-3">
-                        <i class="bi bi-plus-lg me-2"></i> INITIALIZE_SCAN
-                    </a>
+                </div>
+                <div class="col-lg-4">
+                    <div class="glass-card p-4 h-100">
+                        <h5 class="fw-800 text-white mb-5 d-flex align-items-center gap-2">
+                            <i class="bi bi-pie-chart text-primary"></i> Distribution
+                        </h5>
+                        <div class="chart-container d-flex align-items-center">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-    </main>
+            <!-- Recent Forensics & Quick Actions -->
+            <div class="row g-4">
+                <div class="col-lg-9">
+                    <div class="glass-card p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-800 text-white m-0">Recent Forensic Activity</h5>
+                            <a th:href="@{/audit-logs}" class="text-primary text-decoration-none small fw-700">FULL_TRAIL <i class="bi bi-chevron-right ms-1"></i></a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="premium-table">
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Operator</th>
+                                        <th>Vector Hash</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="log : ${recentLogs}">
+                                        <td class="mono fw-600 text-white-50" th:text="${#temporals.format(log.timestamp, 'HH:mm:ss')}">12:00:00</td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="pulse-active"></div>
+                                                <span class="text-white fw-700" th:text="${log.performedBy}">SYSTEM</span>
+                                            </div>
+                                        </td>
+                                        <td class="mono small text-muted">[[${#strings.toUpperCase(#strings.substring(log.action,0,12))}]]...</td>
+                                        <td><span class="badge-status status-active">SECURE</span></td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(recentLogs)}">
+                                        <td colspan="4" class="text-center py-5 text-muted mono">AWAITING_MATRIX_FEED...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="d-flex flex-column gap-3 h-100">
+                        <a th:href="@{/threat-scan}" class="quick-action-btn h-50">
+                            <i class="bi bi-plus-circle text-primary fs-1"></i>
+                            <div>
+                                <div class="fw-700">New Analysis</div>
+                                <div class="extra-small text-muted mt-1">Initiate deep scan pulse</div>
+                            </div>
+                        </a>
+                        <a th:href="@{/mitigation-rules}" class="quick-action-btn h-50">
+                            <i class="bi bi-gear-wide-connected text-primary fs-1"></i>
+                            <div>
+                                <div class="fw-700">Shield Settings</div>
+                                <div class="extra-small text-muted mt-1">Configure active defense</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function updateClock() {
+    <script th:inline="javascript">
+        // Real-time Clock
+        function updateTime() {
             const now = new Date();
-            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
-                          now.getMinutes().toString().padStart(2, '0') + ':' + 
-                          now.getSeconds().toString().padStart(2, '0');
-            document.getElementById('liveClock').innerText = timeStr;
+            const dateStr = now.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+            const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) + ' UTC';
+            document.getElementById('liveDate').innerText = dateStr;
+            document.getElementById('liveTime').innerText = timeStr;
         }
-        setInterval(updateClock, 1000);
-        updateClock();
+        setInterval(updateTime, 1000);
+        updateTime();
 
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const toggle = document.getElementById('sidebarToggle');
+        // Chart.js Configuration
+        const ctxThreat = document.getElementById('threatChart').getContext('2d');
+        const threatChart = new Chart(ctxThreat, {
+            type: 'line',
+            data: {
+                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                datasets: [{
+                    label: 'Threat Density',
+                    data: [12, 19, 15, 25, 22, 30, 28],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#3b82f6'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#64748b' } },
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } }
+                }
+            }
+        });
 
-        if(toggle) {
-            toggle.addEventListener('click', () => {
-                sidebar.classList.add('show');
-                overlay.classList.add('active');
-            });
-        }
-
-        if(overlay) {
-            overlay.addEventListener('click', () => {
-                sidebar.classList.remove('show');
-                overlay.classList.remove('active');
-            });
-        }
+        const ctxCat = document.getElementById('categoryChart').getContext('2d');
+        const categoryChart = new Chart(ctxCat, {
+            type: 'doughnut',
+            data: {
+                labels: ['Malware', 'Phishing', 'Anomalies', 'DDoS'],
+                datasets: [{
+                    data: [45, 25, 20, 10],
+                    backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#f43f5e'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#94a3b8', boxWidth: 12, padding: 15, font: { size: 10 } }
+                    }
+                },
+                cutout: '75%'
+            }
+        });
     </script>
 </body>
 </html>
->
