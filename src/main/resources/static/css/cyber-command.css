@@ -308,6 +308,47 @@ footer {
 
 /* Responsive */
 @media (max-width: 991px) {
-    .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
-    .main-content { margin-left: 0; }
+    .app-wrapper {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        transform: none;
+        padding: 16px;
+        border-right: none;
+        border-bottom: 1px solid var(--glass-border);
+    }
+    .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+    }
+    .sidebar nav {
+        display: flex;
+        overflow-x: auto;
+        white-space: nowrap;
+        gap: 12px;
+        padding-bottom: 10px;
+        margin-top: 15px;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .sidebar nav::-webkit-scrollbar {
+        display: none;
+    }
+    .sidebar .position-absolute {
+        position: static !important;
+        padding: 0 !important;
+        margin-top: 15px;
+    }
+    .nav-item {
+        margin-bottom: 0;
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        background: rgba(255,255,255,0.03);
+    }
+    .nav-item.active {
+        background: rgba(59, 130, 246, 0.2);
+    }
 }
