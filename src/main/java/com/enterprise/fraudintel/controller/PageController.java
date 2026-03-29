@@ -137,4 +137,10 @@ public class PageController {
         }
         return "redirect:/";
     }
+
+    @GetMapping("/clear-archives")
+    public String clearArchives() {
+        scanResultRepository.deleteAll();
+        return "redirect:/";
+    }
 }
