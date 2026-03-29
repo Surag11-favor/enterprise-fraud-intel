@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
@@ -85,8 +86,15 @@ public class PageController {
     }
 
     @PostMapping("/rules/add")
-    public String addRule(MitigationRule rule) {
-        if (rule.getPriority() == null) rule.setPriority(1);
+    public String addRule(@RequestParam String name, 
+                          @RequestParam String description, 
+                          @RequestParam String action) {
+        MitigationRule rule = new MitigationRule();
+        rule.setName(name);
+        rule.setDescription(description);
+        rule.setAction(action);
+        rule.setEnabled(true);
+        rule.setPriority(1);
         mitigationRuleRepository.save(rule);
         return "redirect:/mitigation-rules";
     }
@@ -98,12 +106,15 @@ public class PageController {
     }
 
     @PostMapping("/authorized-users/add")
-    public String addUser(User user) {
-        if (userRepository.findByUsername(user.getUsername()).isEmpty()) {
-            String rawPassword = (user.getPassword() != null && !user.getPassword().isEmpty()) 
-                ? user.getPassword() : "password123";
+    public String addUser(@RequestParam String username, 
+                          @RequestParam String password, 
+                          @RequestParam(defaultValue = "USER") String role) {
+        if (userRepository.findByUsername(username).isEmpty()) {
+            User user = new User();
+            user.setUsername(username);
+            String rawPassword = (password != null && !password.isEmpty()) ? password : "password123";
             user.setPassword(passwordEncoder.encode(rawPassword));
-            if (user.getRole() == null || user.getRole().isEmpty()) user.setRole("USER");
+            user.setRole(role);
             userRepository.save(user);
         }
         return "redirect:/authorized-users";
