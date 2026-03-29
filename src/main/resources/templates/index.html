@@ -22,7 +22,8 @@
             font-weight: 800;
             font-size: 1.5rem;
             letter-spacing: -0.05em;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -34,7 +35,7 @@
     <nav class="navbar navbar-expand-lg fixed-top glass-card py-3 mx-4 mt-3" style="border-radius: 20px;">
         <div class="container-fluid px-4">
             <a class="navbar-brand nav-logo d-flex align-items-center gap-2" href="#">
-                <i class="bi bi-shield-lock-fill text-primary"></i> VORTEX-PRIMUS
+                <i class="bi bi-radar text-cyan"></i> VORTEX-PRIMUS
             </a>
             <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="bi bi-list text-white fs-2"></span>
@@ -53,45 +54,49 @@
         </div>
     </nav>
 
-    <!-- Extraordinary Hero Section -->
     <section class="hero-container container">
         <div class="row align-items-center g-5">
             <div class="col-lg-6">
-                <div class="badge rounded-pill bg-primary bg-opacity-10 text-primary px-3 py-2 mb-4 fw-700 small border border-primary border-opacity-20">
+                <div class="badge rounded-pill bg-cyan bg-opacity-10 text-cyan px-3 py-2 mb-4 fw-700 small border border-cyan border-opacity-20" style="color: var(--accent-cyan);">
                     <span class="pulse-active d-inline-block me-2"></span> ELITE SECURITY PROTOCOL ONLINE
                 </div>
                 <h1 class="hero-title">Defending the <br><span class="gradient-text">Digital Frontier</span></h1>
                 <p class="text-secondary fs-5 mb-5 pe-lg-5" style="max-width: 540px;">
-                    Enterprise-grade fraud intelligence and real-time threat analysis. Built for executives who demand absolute protection and predictive dominance.
+                    Next-generation fraud intelligence and real-time threat analysis. Built for executives who demand absolute protection and predictive dominance.
                 </p>
                 <div class="d-flex flex-wrap gap-3">
-                    <a th:href="@{/register}" class="btn-premium py-3 px-5 fs-6">Get Started Now</a>
+                    <a th:href="@{/register}" class="btn-premium py-3 px-5 fs-6">Initialize Hub</a>
                     <a href="#features" class="btn-outline py-3 px-5 fs-6">Explore Features</a>
                 </div>
                 
-                <!-- Hero Counter -->
                 <div class="mt-5 d-flex gap-5">
                     <div>
-                        <div class="fs-2 fw-800 text-white">99.9<span class="text-primary">%</span></div>
+                        <div class="fs-2 fw-800 text-white">99.9<span class="text-cyan">%</span></div>
                         <div class="small text-muted fw-600">THREAT DETECTION</div>
                     </div>
                     <div>
-                        <div class="fs-2 fw-800 text-white">&lt;50<span class="text-primary">ms</span></div>
+                        <div class="fs-2 fw-800 text-white">&lt;50<span class="text-cyan">ms</span></div>
                         <div class="small text-muted fw-600">RESPONSE LATENCY</div>
                     </div>
                 </div>
             </div>
             <div class="col-lg-6">
                 <div class="hero-image-wrapper">
-                    <img th:src="@{/images/ceo_commander.png}" alt="CEO Commander" class="img-fluid" style="width: 100%; border-radius: 24px;"
-                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1573164060897-425941c47065?q=80&w=2069&auto=format&fit=crop';">
+                    <!-- Premium Technical Visual (No baked-in text) -->
+                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop" alt="Vortex Defense Matrix" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;">
                     
-                    <!-- Floating Stat Overlay -->
-                    <div class="glass-card position-absolute bottom-0 start-0 m-4 p-4 d-flex align-items-center gap-3" style="background: rgba(10,10,15,0.9);">
-                        <div class="rounded-circle bg-success" style="width: 12px; height: 12px; box-shadow: 0 0 15px var(--accent-emerald);"></div>
-                        <div>
-                            <div class="fw-800 text-white small">EXECUTIVE FEED</div>
-                            <div class="text-success extra-small fw-700 mono">ENCRYPTED // LIVE</div>
+                    <!-- Branded Glass Interface Overlay -->
+                    <div class="brand-image-overlay">
+                        <div class="hologram-label">
+                            <i class="bi bi-radar text-cyan fs-4"></i>
+                            <div>
+                                <div class="text-white extra-small fw-800 uppercase" style="letter-spacing: 2px;">SECURE PROTOCOL</div>
+                                <div class="text-cyan fw-900 fs-5">VORTEX-PRIMUS</div>
+                            </div>
+                        </div>
+                        <div class="glass-card mt-3 p-3 d-flex align-items-center gap-3" style="background: rgba(2,6,23,0.8); border-color: rgba(34,211,238,0.2);">
+                            <div class="rounded-circle bg-success" style="width: 10px; height: 10px; box-shadow: 0 0 15px var(--accent-emerald);"></div>
+                            <div class="extra-small text-white-50 fw-700 mono">TERMINAL_ENCRYPTION_ACTIVE // 256-BIT</div>
                         </div>
                     </div>
                 </div>
