@@ -1,19 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;600;800&display=swap');
 
 :root {
-    /* Refinement: Midnight Slate Palette (Reduced "Too Black" heaviness) */
-    --bg-darker: #050811; /* Slightly lighter than pure black */
-    --bg-dark: #0f172a;   /* Slate Deep */
-    --bg-card: rgba(15, 23, 42, 0.7);
+    /* Refinement: Professional Slate Palette (High Contrast) */
+    --bg-darker: #0f172a; /* Slate 900 - Professional Dark Blue */
+    --bg-dark: #1e293b;   /* Slate 800 */
+    --bg-card: rgba(30, 41, 59, 0.7);
     --accent-blue: #3b82f6;
     --accent-cyan: #22d3ee;
     --accent-emerald: #10b981;
-    --accent-purple: #818cf8; /* Increased brightness */
-    --accent-rose: #f43f5e;
+    --accent-purple: #a78bfa; /* Brighter */
+    --accent-rose: #fb7185;   /* Brighter */
     
     --text-primary: #ffffff;
-    --text-secondary: #cbd5e1; /* Increased contrast from 94a3b8 */
-    --text-muted: #94a3b8;    /* Increased contrast from 64748b */
+    --text-secondary: #e2e8f0; /* Slate 200 - Very high contrast */
+    --text-muted: #94a3b8;    /* Slate 400 */
     
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-shine: rgba(255, 255, 255, 0.03);
@@ -138,10 +138,11 @@ h1, h2, h3, h4, h5, h6 {
     font-size: clamp(3.5rem, 8vw, 5rem);
     font-weight: 800;
     margin-bottom: 24px;
-    background: linear-gradient(to bottom right, #fff 40%, #64748b);
+    background: linear-gradient(135deg, #ffffff 20%, var(--accent-cyan) 80%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    text-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
 .gradient-text {
@@ -200,7 +201,7 @@ h1, h2, h3, h4, h5, h6 {
     position: fixed;
     left: 0;
     top: 0;
-    background: #050811;
+    background: var(--bg-darker);
     border-right: 1px solid var(--glass-border);
     padding: 40px 20px;
     z-index: 1000;
