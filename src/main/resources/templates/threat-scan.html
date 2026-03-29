@@ -58,6 +58,27 @@
         .terminal-line { margin-bottom: 4px; }
         .terminal-line .time { color: var(--text-muted); margin-right: 10px; }
         .terminal-line .prefix { color: var(--accent-blue); margin-right: 10px; }
+        
+        /* Premium Form Elements */
+        .form-input-premium {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            color: white !important;
+            padding: 14px 20px;
+            border-radius: 12px;
+            width: 100%;
+            transition: var(--transition);
+        }
+        .form-input-premium:focus {
+            background: rgba(255,255,255,0.05);
+            border-color: var(--accent-blue);
+            outline: none;
+        }
+        .form-select-premium option {
+            background-color: var(--bg-dark);
+            color: white;
+            padding: 10px;
+        }
     </style>
 </head>
 <body class="fade-in">
@@ -110,8 +131,13 @@
 
                         <form id="scanForm" th:action="@{/threat-scan}" method="post">
                             <div class="mb-4">
+                                <label class="small fw-700 text-muted text-uppercase mb-2 d-block" style="letter-spacing: 0.1em;">Target Intelligence Pointer</label>
+                                <input type="text" id="targetIp" name="targetIp" class="form-input-premium" placeholder="https://cyberspace.node/alpha-omega or 192.168.1.1" required>
+                            </div>
+
+                            <div class="mb-4">
                                 <label class="small fw-700 text-muted text-uppercase mb-2 d-block" style="letter-spacing: 0.1em;">Target Origin</label>
-                                <select name="target" class="form-select-premium" style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); color: white; padding: 14px; border-radius: 12px; width: 100%;" required>
+                                <select name="targetOrigin" class="form-select-premium" style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); color: white; padding: 14px; border-radius: 12px; width: 100%;" required>
                                     <option value="Global">GLOBAL_NEURAL_CORE</option>
                                     <option value="Regional">REGIONAL_ISOLATION</option>
                                     <option value="Endpoint">ENDPOINT_SPECIFIC</option>
@@ -212,7 +238,8 @@
 
         scanForm.onsubmit = (e) => {
             e.preventDefault();
-            const target = e.target.target.value;
+            const targetPointer = document.getElementById('targetIp').value;
+            const targetOrigin = e.target.targetOrigin.value;
             
             startBtn.disabled = true;
             startBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> ANALYZING...';
@@ -222,7 +249,10 @@
             scanStatus.innerText = 'INITIALIZING_DEEP_SCAN';
             scanStatus.classList.replace('text-emerald', 'text-primary');
 
-            addLog(`Establishing secure link to ${target} node...`);
+            addLog(`Establishing secure link to ${targetOrigin} node...`);
+            setTimeout(() => {
+                addLog(`Analyzing pointer: ${targetPointer}...`, 'NET:');
+            }, 500);
             
             setTimeout(() => {
                 addLog('Neural weights loaded. Protocol L7 decryption active.');
