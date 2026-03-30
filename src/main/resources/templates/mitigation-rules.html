@@ -108,10 +108,10 @@
                             <tr th:each="rule : ${rules}" th:classappend="${!rule.enabled} ? 'rule-disabled' : ''">
                                 <!-- Toggle Switch -->
                                 <td>
-                                    <label class="toggle-switch" th:title="${rule.enabled ? 'Click to disable' : 'Click to enable'}" th:attr="onclick='toggleRule(' + ${rule.id} + ')'">
-                                        <input type="checkbox" th:checked="${rule.enabled}" readonly>
+                                    <div class="toggle-switch" th:data-rule-id="${rule.id}" th:title="${rule.enabled ? 'Click to disable' : 'Click to enable'}">
+                                        <input type="checkbox" th:checked="${rule.enabled}" tabindex="-1">
                                         <span class="toggle-slider"></span>
-                                    </label>
+                                    </div>
                                 </td>
                                 <td class="fw-700 text-white" th:text="${rule.name}">Default Rule</td>
                                 <td class="mono small text-muted" th:text="${rule.description}">pattern_match</td>
@@ -124,7 +124,7 @@
                                     <span th:if="${rule.action == 'FLAG'}" class="badge-status" style="background: rgba(59,130,246,0.1); color: #3b82f6; border: 1px solid rgba(59,130,246,0.2);" th:text="${rule.action}">FLAG</span>
                                 </td>
                                 <td>
-                                    <button type="button" class="btn btn-outline-danger border-0 p-2 lh-1 text-danger" title="REVOKE RULE" th:attr="onclick='deleteRule(' + ${rule.id} + ')'">
+                                    <button type="button" class="btn btn-outline-danger border-0 p-2 lh-1 text-danger btn-delete-rule" th:data-rule-id="${rule.id}" title="REVOKE RULE">
                                         <i class="bi bi-x-octagon"></i>
                                     </button>
                                 </td>
@@ -182,38 +182,54 @@
         const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
-        async function toggleRule(id) {
-            try {
-                const res = await fetch('/api/rules/' + id + '/toggle', {
+        // Toggle: attach click to every .toggle-switch div
+        document.querySelectorAll('.toggle-switch[data-rule-id]').forEach(function(toggle) {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var id = this.getAttribute('data-rule-id');
+                // Immediately flip the visual
+                var cb = this.querySelector('input[type="checkbox"]');
+                if (cb) cb.checked = !cb.checked;
+
+                fetch('/api/rules/' + id + '/toggle', {
                     method: 'POST',
                     headers: { [csrfHeader]: csrfToken }
-                });
-                if (res.ok) {
+                }).then(function(res) {
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Failed to toggle rule. Status: ' + res.status);
+                        window.location.reload();
+                    }
+                }).catch(function(err) {
+                    alert('Network error: ' + err.message);
                     window.location.reload();
-                } else {
-                    alert('Failed to toggle rule. Status: ' + res.status);
-                }
-            } catch (err) {
-                alert('Network error: ' + err.message);
-            }
-        }
+                });
+            });
+        });
 
-        async function deleteRule(id) {
-            if (!confirm('Revoke this defense protocol?')) return;
-            try {
-                const res = await fetch('/api/rules/' + id, {
+        // Delete: attach click to every .btn-delete-rule
+        document.querySelectorAll('.btn-delete-rule[data-rule-id]').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (!confirm('Revoke this defense protocol?')) return;
+                var id = this.getAttribute('data-rule-id');
+                fetch('/api/rules/' + id, {
                     method: 'DELETE',
                     headers: { [csrfHeader]: csrfToken }
+                }).then(function(res) {
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Failed to delete rule. Status: ' + res.status);
+                    }
+                }).catch(function(err) {
+                    alert('Network error: ' + err.message);
                 });
-                if (res.ok) {
-                    window.location.reload();
-                } else {
-                    alert('Failed to delete rule. Status: ' + res.status);
-                }
-            } catch (err) {
-                alert('Network error: ' + err.message);
-            }
-        }
+            });
+        });
     </script>
 </body>
 </html>
+
