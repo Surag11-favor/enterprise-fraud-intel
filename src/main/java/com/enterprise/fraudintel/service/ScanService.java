@@ -45,6 +45,8 @@ public class ScanService {
         "password", "secret", "billing", "payment", "card-number", "cvv", "expiry"
     );
 
+    private static final String EICAR_SIGNATURE = "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*";
+
     private static final int CONNECT_TIMEOUT_MS = 6000;
     private static final int READ_TIMEOUT_MS = 6000;
     private static final int MAX_CONTENT_BYTES = 1024_000; // Increased to 1MB
@@ -111,9 +113,15 @@ public class ScanService {
                     List<Path> sourceFiles = stream.filter(Files::isRegularFile).limit(100).collect(Collectors.toList());
                     for (Path file : sourceFiles) {
                         try {
-                            String content = Files.readString(file).toLowerCase();
+                            String content = Files.readString(file);
+                            if (content.contains(EICAR_SIGNATURE)) {
+                                totalScore = 100.0;
+                                p2Findings.add("✗ CRITICAL THREAT: VIRUS SIGNATURE DETECTED in " + file.getFileName());
+                                break;
+                            }
+                            String lowerContent = content.toLowerCase();
                             for (String pat : HEURISTIC_PATTERNS) {
-                                if (content.matches(".*" + pat + ".*")) {
+                                if (lowerContent.matches(".*" + pat + ".*")) {
                                     totalScore += 5.0;
                                     p2Findings.add("✗ MALICIOUS VECTOR ['" + pat + "'] in " + file.getFileName());
                                     break;
@@ -129,7 +137,7 @@ public class ScanService {
         findings.addAll(p2Findings);
 
         double finalScore = Math.min(totalScore, 100.0);
-        String risk = finalScore >= 60 ? "HIGH" : (finalScore >= 30 ? "MEDIUM" : "LOW");
+        String risk = finalScore >= 90 ? "CRITICAL" : (finalScore >= 60 ? "HIGH" : (finalScore >= 30 ? "MEDIUM" : "LOW"));
         return buildResponse(risk, finalScore, "System Pulse Complete. Status: " + risk, findings, phases);
     }
 
@@ -167,33 +175,44 @@ public class ScanService {
         p2Findings.add("○ Commencing deep heuristic scanning engine...");
         simulateProcessing(2000); // Intensive scan
         
+        boolean virusDetected = false;
         if (pageContent != null) {
-            String[] lines = pageContent.split("\n");
-            int lineNum = 0;
-            int threatsFound = 0;
-            
-            for (String line : lines) {
-                lineNum++;
-                String trimmedLine = line.trim();
-                if (trimmedLine.isEmpty()) continue;
-                
-                for (String pattern : HEURISTIC_PATTERNS) {
-                    if (trimmedLine.matches(".*" + pattern + ".*")) {
-                        totalScore += 12.0;
-                        threatsFound++;
-                        String evidence = "L" + lineNum + ": Match [" + pattern + "] -> " + (trimmedLine.length() > 80 ? trimmedLine.substring(0, 80) + "..." : trimmedLine);
-                        p2Findings.add("✗ THREAT_DETECTED: " + evidence);
-                        evidenceLog.add(evidence);
-                        break; // Count once per line
-                    }
-                }
-                if (threatsFound > 20) break; // Capping to prevent excessive score
+            // Case-Sensitive Check for EICAR Signature
+            if (pageContent.contains(EICAR_SIGNATURE)) {
+                virusDetected = true;
+                totalScore = 100.0;
+                p2Findings.add("✗ CRITICAL THREAT: VIRUS SIGNATURE DETECTED");
+                evidenceLog.add("Known Malware Signature: EICAR Standard Anti-Virus Test File");
             }
             
-            if (threatsFound > 0) {
-                p2Findings.add("⚠ Identified " + threatsFound + " malicious signatures within the data stream");
-            } else {
-                p2Findings.add("✓ No known malicious patterns identified in raw stream");
+            if (!virusDetected) {
+                String[] lines = pageContent.split("\n");
+                int lineNum = 0;
+                int threatsFound = 0;
+                
+                for (String line : lines) {
+                    lineNum++;
+                    String trimmedLine = line.trim();
+                    if (trimmedLine.isEmpty()) continue;
+                    
+                    for (String pattern : HEURISTIC_PATTERNS) {
+                        if (trimmedLine.toLowerCase().matches(".*" + pattern + ".*")) {
+                            totalScore += 12.0;
+                            threatsFound++;
+                            String evidence = "L" + lineNum + ": Match [" + pattern + "] -> " + (trimmedLine.length() > 80 ? trimmedLine.substring(0, 80) + "..." : trimmedLine);
+                            p2Findings.add("✗ THREAT_DETECTED: " + evidence);
+                            evidenceLog.add(evidence);
+                            break; // Count once per line
+                        }
+                    }
+                    if (threatsFound > 20) break; // Capping to prevent excessive score
+                }
+                
+                if (threatsFound > 0) {
+                    p2Findings.add("⚠ Identified " + threatsFound + " malicious signatures within the data stream");
+                } else {
+                    p2Findings.add("✓ No known malicious patterns identified in raw stream");
+                }
             }
         }
         
@@ -208,7 +227,7 @@ public class ScanService {
         p3Findings.add("○ Auditing for credential harvesting & unauthorized redirects...");
         simulateProcessing(1500);
         
-        if (pageContent != null) {
+        if (pageContent != null && !virusDetected) {
             boolean hasForm = pageContent.contains("<form") || pageContent.contains("<FORM");
             boolean hasPassword = pageContent.contains("type=\"password\"") || pageContent.contains("type='password'");
             
@@ -220,7 +239,7 @@ public class ScanService {
             
             int keywordCount = 0;
             for (String kw : CREDENTIAL_HARVESTING_KEYWORDS) {
-                if (pageContent.contains(kw)) {
+                if (pageContent.toLowerCase().contains(kw)) {
                     keywordCount++;
                 }
             }
@@ -237,14 +256,15 @@ public class ScanService {
         // FINAL COMPILATION & EVIDENCE LOGGING
         // ============================================
         double finalScore = Math.min(totalScore, 100.0);
-        String risk = finalScore >= 40.0 ? "HIGH" : (finalScore >= 15.0 ? "MEDIUM" : "LOW");
-        String summary = (risk.equals("HIGH") ? "REAL THREAT IDENTIFIED. " : "Scan complete. ") + "Heuristic markers indicate " + risk + " risk probability.";
+        String risk = virusDetected ? "CRITICAL" : (finalScore >= 40.0 ? "HIGH" : (finalScore >= 15.0 ? "MEDIUM" : "LOW"));
+        String summary = virusDetected ? "CRITICAL THREAT: VIRUS SIGNATURE DETECTED" : 
+                        ((risk.equals("HIGH") ? "REAL THREAT IDENTIFIED. " : "Scan complete. ") + "Heuristic markers indicate " + risk + " risk probability.");
         
-        if (risk.equals("HIGH") || risk.equals("MEDIUM")) {
+        if (virusDetected || risk.equals("HIGH") || risk.equals("MEDIUM")) {
             String evidenceReport = String.join(" | ", evidenceLog);
             if (evidenceReport.length() > 2000) evidenceReport = evidenceReport.substring(0, 1997) + "...";
             logThreatEvidence(rawUrl, risk, finalScore, evidenceReport);
-            applyMitigationRules(risk.equals("HIGH") ? "BLOCK" : "CHALLENGE", rawUrl, "Universal Scan Verdict: " + risk + " | Evidence: " + evidenceReport);
+            applyMitigationRules(virusDetected || risk.equals("HIGH") ? "BLOCK" : "CHALLENGE", rawUrl, "Universal Scan Verdict: " + risk + " | Evidence: " + evidenceReport);
         }
         
         return buildResponse(risk, finalScore, summary, findings, phases);
@@ -253,9 +273,9 @@ public class ScanService {
     private void logThreatEvidence(String url, String risk, double score, String evidence) {
         if (auditLogRepository == null) return;
         AuditLog l = new AuditLog();
-        l.setAction("UNIVERSAL_THREAT_DETECTION");
+        l.setAction(evidence.contains("Known Malware Signature") ? "MALWARE_DETECTION" : "UNIVERSAL_THREAT_DETECTION");
         l.setPerformedBy("VORTEX-HEURISTIC-ENGINE");
-        l.setDetails("Target: " + url + " | Risk: " + risk + " | Score: " + score + " | Evidence: " + evidence);
+        l.setDetails("Target: " + url + " | Risk: " + risk + " | Score: " + score + " | Evidence: " + (evidence.contains("Known Malware Signature") ? "Known Malware Signature: " + evidence : evidence));
         auditLogRepository.save(l);
     }
 
