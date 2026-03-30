@@ -11,132 +11,225 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <style>
         .terminal-output {
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.8);
             border-radius: 12px;
-            padding: 16px 20px;
+            padding: 18px 22px;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.78rem;
             color: var(--accent-emerald);
-            max-height: 500px;
+            max-height: 550px;
             overflow-y: auto;
             border: 1px solid var(--glass-border);
-            line-height: 1.6;
+            line-height: 1.7;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.4);
         }
-        .terminal-line { margin-bottom: 2px; display: flex; gap: 8px; }
-        .terminal-line .time { color: rgba(255,255,255,0.2); min-width: 70px; }
-        .terminal-line .prefix { color: var(--accent-blue); min-width: 50px; font-weight: 700; }
-        .terminal-line.finding-critical { color: #f43f5e; }
-        .terminal-line.finding-warning { color: #fbbf24; }
-        .terminal-line.finding-safe { color: #10b981; }
+        .terminal-line { margin-bottom: 3px; display: flex; gap: 10px; }
+        .terminal-line .time { color: rgba(255,255,255,0.15); min-width: 75px; font-weight: 300; }
+        .terminal-line .prefix { color: var(--accent-blue); min-width: 60px; font-weight: 800; font-size: 0.72rem; }
+        .terminal-line.finding-critical .msg { color: #f43f5e; text-shadow: 0 0 8px rgba(244, 63, 94, 0.3); }
+        .terminal-line.finding-warning .msg { color: #fbbf24; }
+        .terminal-line.finding-safe .msg { color: #10b981; }
         
-        .scan-progress-container { display: none; margin-bottom: 16px; }
-        .scan-progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; }
-        .scan-progress-fill { height: 100%; background: linear-gradient(90deg, #60a5fa, #10b981); width: 0%; transition: width 0.3s; }
+        .scan-progress-container { display: none; margin-bottom: 20px; }
+        .scan-progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.03); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+        .scan-progress-fill { height: 100%; background: linear-gradient(90deg, #60a5fa, #818cf8, #10b981); width: 0%; transition: width 0.4s ease-out; }
         
         .risk-gauge {
-            width: 140px; height: 140px; border-radius: 50%;
+            width: 150px; height: 150px; border-radius: 50%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 2rem; font-weight: 800; border: 4px solid rgba(255,255,255,0.05);
+            font-size: 2.2rem; font-weight: 800; border: 6px solid rgba(255,255,255,0.02);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(255,255,255,0.01);
         }
-        .risk-high { border-color: #f43f5e; color: #f43f5e; box-shadow: 0 0 20px rgba(244, 63, 94, 0.2); }
+        .risk-high { border-color: #f43f5e; color: #f43f5e; box-shadow: 0 0 30px rgba(244, 63, 94, 0.15); }
         .risk-medium { border-color: #fbbf24; color: #fbbf24; }
-        .risk-low { border-color: #10b981; color: #10b981; }
+        .risk-low { border-color: #10b981; color: #10b981; box-shadow: 0 0 30px rgba(16, 185, 129, 0.1); }
 
-        .phase-card { background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px; margin-bottom: 8px; }
-        .phase-card-header { display: flex; justify-content: space-between; cursor: pointer; }
-        .phase-card-body { display: none; padding-top: 10px; font-size: 0.8rem; }
+        .phase-card { background: rgba(255,255,255,0.01); border: 1px solid var(--glass-border); border-radius: 14px; padding: 14px; margin-bottom: 10px; transition: 0.3s; }
+        .phase-card:hover { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.1); }
+        .phase-card-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .phase-card-body { display: none; padding-top: 15px; font-size: 0.82rem; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 10px; }
         .phase-card.expanded .phase-card-body { display: block; }
         
-        .btn-fix-all { background: #f43f5e; color: white; font-weight: 800; letter-spacing: 0.05em; border: none; box-shadow: 0 10px 30px rgba(244, 63, 94, 0.3); transition: 0.3s; }
-        .btn-fix-all:hover { transform: translateY(-2px); box-shadow: 0 15px 40px rgba(244, 63, 94, 0.4); }
+        .btn-fix-all { 
+            background: linear-gradient(135deg, #f43f5e, #e11d48); 
+            color: white; font-weight: 800; letter-spacing: 0.08em; border: none; 
+            box-shadow: 0 10px 40px rgba(244, 63, 94, 0.4); 
+            transition: all 0.4s; 
+            text-transform: uppercase;
+        }
+        .btn-fix-all:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 20px 50px rgba(244, 63, 94, 0.5); filter: brightness(1.1); }
+        .btn-fix-all:active { transform: translateY(0); }
     </style>
 </head>
 <body class="fade-in">
     <div class="app-wrapper">
         <aside class="sidebar">
-            <div class="px-3 mb-5"><span class="fs-4 fw-800 text-white">VORTEX-PRIMUS</span></div>
+            <div class="px-4 mb-5 mt-3"><span class="fs-4 fw-800 text-white" style="letter-spacing:-1px;">VORTEX-PRIMUS</span></div>
             <nav>
-                <a th:href="@{/dashboard}" class="nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                <a th:href="@{/dashboard}" class="nav-item"><i class="bi bi-grid-1x2"></i> Dashboard</a>
                 <a th:href="@{/threat-scan}" class="nav-item active"><i class="bi bi-radar"></i> Intelligence Scan</a>
-                <a th:href="@{/mitigation-rules}" class="nav-item"><i class="bi bi-shield-exclamation"></i> Protections</a>
-                <a th:href="@{/audit-logs}" class="nav-item"><i class="bi bi-journal-text"></i> Audit Logs</a>
+                <a th:href="@{/mitigation-rules}" class="nav-item"><i class="bi bi-shield-lock"></i> Mitigation Rules</a>
+                <a th:href="@{/authorized-users}" class="nav-item"><i class="bi bi-people"></i> Staff Console</a>
+                <a th:href="@{/audit-logs}" class="nav-item"><i class="bi bi-clipboard-data"></i> Core Logs</a>
             </nav>
         </aside>
 
         <main class="main-content">
-            <header class="mb-5">
-                <h2 class="fw-800 text-white m-0">Intelligence Scan</h2>
-                <p class="text-muted small">Deep-packet heuristics and neural vector analysis pulse.</p>
+            <header class="mb-5 d-flex justify-content-between align-items-end">
+                <div>
+                    <h2 class="fw-900 text-white m-0" style="font-size: 2.2rem;">Deep Intelligence Scan</h2>
+                    <p class="text-white-50 small mt-1">Universal threat auditor for local nodes and cloud infrastructure.</p>
+                </div>
+                <div class="glass-card px-3 py-2 d-flex align-items-center gap-2" style="border-radius: 50px;">
+                    <div class="bg-success rounded-circle pulse-animation" style="width:8px; height:8px;"></div>
+                    <span class="x-small fw-800 text-white-50 mono">CORE_ENGINE_V2.4: ONLINE</span>
+                </div>
             </header>
 
             <div class="row g-4">
                 <div class="col-lg-4">
-                    <div class="glass-card p-4">
-                        <h5 class="text-white mb-3">Target Node</h5>
+                    <div class="glass-card p-4 h-100">
+                        <div class="mb-4">
+                            <h5 class="text-white fw-800 mb-2">Target Definition</h5>
+                            <p class="text-muted x-small">Define the pointer for deep audit (URL, IP, or LOCAL_SYSTEM).</p>
+                        </div>
                         <form id="scanForm">
-                            <div class="mb-3">
-                                <input type="text" id="targetIp" class="form-control bg-dark border-secondary text-white py-3" placeholder="https://threat-actor.xyz or LOCAL_SYSTEM" required>
+                            <div class="mb-4">
+                                <label class="x-small fw-800 text-muted text-uppercase mb-2 d-block">Node Identifier</label>
+                                <input type="text" id="targetIp" class="form-control bg-dark border-secondary border-opacity-30 text-white py-3 fw-600" style="border-radius:12px;" placeholder="https://target.com or ./local" required>
+                                <div class="mt-2 d-flex gap-2">
+                                    <span class="badge bg-secondary bg-opacity-10 text-white-50 border border-secondary border-opacity-20 px-2 py-1 x-small pointer" onclick="document.getElementById('targetIp').value='LOCAL_SYSTEM'">./LOCAL_SYSTEM</span>
+                                    <span class="badge bg-secondary bg-opacity-10 text-white-50 border border-secondary border-opacity-20 px-2 py-1 x-small pointer" onclick="document.getElementById('targetIp').value='https://google.com'">GOOGLE_CLOUD</span>
+                                </div>
                             </div>
-                            <button type="submit" id="startBtn" class="btn-premium w-100 py-3">LAUNCH DEEP SCAN</button>
+                            <button type="submit" id="startBtn" class="btn-premium w-100 py-3 d-flex align-items-center justify-content-center gap-2">
+                                <i class="bi bi-shield-shaded"></i> INITIALIZE DEEP AUDIT
+                            </button>
                         </form>
-                        <div class="mt-4 pt-4 border-top border-secondary border-opacity-20">
-                            <h6 class="text-muted small fw-700 text-uppercase mb-3">Scanning Engine Status</h6>
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <div class="bg-success rounded-circle" style="width:8px; height:8px;"></div>
-                                <span class="small text-white-50">Heuristic Module: ACTIVE</span>
+                        <div class="mt-5 pt-4 border-top border-secondary border-opacity-10">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="x-small fw-800 text-muted text-uppercase">Modules Locked</span>
+                                <i class="bi bi-lock-fill x-small text-muted"></i>
                             </div>
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="bg-success rounded-circle" style="width:8px; height:8px;"></div>
-                                <span class="small text-white-50">Local Audit Module: READY</span>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="d-flex align-items-center justify-content-between glass-card p-2 px-3 border-opacity-10">
+                                    <span class="x-small text-white-50">HEURISTIC PULSE</span>
+                                    <i class="bi bi-check-circle-fill text-success x-small"></i>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between glass-card p-2 px-3 border-opacity-10">
+                                    <span class="x-small text-white-50">SCA ENGINE</span>
+                                    <i class="bi bi-check-circle-fill text-success x-small"></i>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between glass-card p-2 px-3 border-opacity-10">
+                                    <span class="x-small text-white-50">TRANS-CERT AUDIT</span>
+                                    <i class="bi bi-check-circle-fill text-success x-small"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-lg-8">
-                    <div class="glass-card p-4 h-100">
-                        <div class="d-flex justify-content-between mb-3">
-                            <span class="text-white-50 small fw-700">LIVE SCAN TERMINAL</span>
-                            <span id="scanStatus" class="badge bg-primary bg-opacity-10 text-primary">IDLE</span>
+                    <div class="glass-card p-4 h-100 position-relative overflow-hidden">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-terminal-fill text-primary"></i>
+                                <span class="text-white fw-800 small">INTELLIGENCE_TERMINAL</span>
+                            </div>
+                            <span id="scanStatus" class="badge bg-secondary bg-opacity-10 text-white-50 border border-secondary border-opacity-20 px-3 py-1 mono x-small">READY_AWAITING_SIGNAL</span>
                         </div>
+                        
                         <div id="progressContainer" class="scan-progress-container">
                             <div class="scan-progress-bar"><div id="progressFill" class="scan-progress-fill"></div></div>
-                            <div id="progressLabel" class="text-muted x-small mt-1 mono">Waiting...</div>
+                            <div class="d-flex justify-content-between mt-2">
+                                <div id="progressLabel" class="text-primary x-small fw-800 mono text-uppercase ls-1">PRE_BOOT_SEQUENCE...</div>
+                                <div id="progressPct" class="text-white-50 x-small mono">0%</div>
+                            </div>
                         </div>
+
                         <div id="terminal" class="terminal-output">
-                            <div class="terminal-line"><span class="time">[INIT]</span><span class="prefix">SYS:</span><span class="msg">Awaiting target...</span></div>
+                            <div class="terminal-line"><span class="time">[01:18:06]</span><span class="prefix">CORE_SYS:</span><span class="msg text-white-50">VORTEX-PRIMUS Intelligence Kernel initialized. Awaiting target node assignment.</span></div>
+                        </div>
+
+                        <!-- Absolute results overlay for better impact -->
+                        <div id="resultsPanel" style="display: none; position: absolute; inset: 0; background: var(--bg-dark); z-index: 10; padding: 25px; overflow-y: auto;">
+                            <div class="d-flex justify-content-between align-items-start mb-4 pb-3 border-bottom border-secondary border-opacity-10">
+                                <div>
+                                    <h4 class="text-white fw-900 m-0">AUDIT SUMMARY</h4>
+                                    <p class="text-muted x-small m-0">Final intelligence report for <span id="summaryNode" class="text-primary mono"></span></p>
+                                </div>
+                                <button class="btn btn-outline-light btn-sm border-opacity-10 x-small fw-700" onclick="hideResults()">CLOSE_REPORT</button>
+                            </div>
+
+                            <div class="row g-4">
+                                <div class="col-md-5">
+                                    <div class="glass-card p-4 text-center d-flex flex-column align-items-center justify-content-center h-100">
+                                        <div id="riskGauge" class="risk-gauge mb-3"><span id="scoreText" style="font-size:3.5rem; letter-spacing:-3px;">0</span></div>
+                                        <h4 id="riskLabel" class="fw-900 mb-1" style="letter-spacing:1px;">VERDICT_PENDING</h4>
+                                        <p id="summaryText" class="text-muted x-small mt-2 px-3"></p>
+                                        
+                                        <div id="fixAllContainer" style="display: none;" class="w-100 mt-4">
+                                            <button id="fixAllBtn" class="btn btn-fix-all w-100 py-3">
+                                                <i class="bi bi-cpu-fill me-2"></i> ACTIVATE MITIGATION OVERRIDE
+                                            </button>
+                                            <div class="d-flex align-items-center justify-content-center gap-2 mt-3">
+                                                <i class="bi bi-shield-fill-exclamation text-danger x-small"></i>
+                                                <span class="text-danger x-small fw-800 text-uppercase mono">Threats demand immediate resolution</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <h6 class="text-white-50 x-small fw-800 text-uppercase mb-3 ls-1">Module Findings Breakdown</h6>
+                                    <div id="phasesList" class="d-flex flex-column gap-2"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="resultsPanel" style="display: none;" class="mt-4">
-                <div class="row g-4">
-                    <div class="col-lg-4 text-center">
-                        <div class="glass-card p-4 d-flex flex-column align-items-center">
-                            <div id="riskGauge" class="risk-gauge mb-3"><span id="scoreText">0</span></div>
-                            <h4 id="riskLabel" class="fw-800 mb-2">VERDICT</h4>
-                            <p id="summaryText" class="text-muted small"></p>
-                            
-                            <div id="fixAllContainer" style="display: none;" class="w-100 mt-3">
-                                <button id="fixAllBtn" class="btn btn-fix-all w-100 py-3 mt-4">
-                                    <i class="bi bi-shield-lock-fill me-2"></i> INVOKE UNIVERSAL FIX
-                                </button>
-                                <p class="text-danger x-small mt-2 fw-700">CRITICAL: Active threats detected.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-8">
-                        <div class="glass-card p-4">
-                            <h5 class="text-white mb-4">Detailed Findings</h5>
-                            <div id="phasesList"></div>
-                        </div>
-                    </div>
+            <!-- Feed Section -->
+            <div class="mt-5">
+                <div class="d-flex justify-content-between align-items-center mb-4 px-2">
+                    <h5 class="fw-800 text-white m-0">Recent Intelligence Feeds</h5>
+                    <button class="btn btn-outline-light btn-sm border-opacity-10 x-small fw-700" onclick="window.location.reload()">REFRESH_DECOY_NODES</button>
+                </div>
+                <div class="glass-card overflow-hidden">
+                    <table class="premium-table m-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Timestamp</th>
+                                <th>Target Node</th>
+                                <th>Risk Distribution</th>
+                                <th class="pe-4">Final Verdict</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="scan : ${scans}">
+                                <td class="ps-4 mono x-small text-muted" th:text="${scan.scanTimestamp != null ? #temporals.format(scan.scanTimestamp, 'HH:mm:ss') : 'N/A'}">12:00:00</td>
+                                <td><code class="text-white x-small fw-700" th:text="${scan.payload}">https://target.com</code></td>
+                                <td style="min-width: 150px;">
+                                    <div class="progress" style="height: 4px; background: rgba(255,255,255,0.05);">
+                                        <div class="progress-bar" role="progressbar" 
+                                             th:style="'width: ' + ${scan.riskScore} + '%; background: ' + (${scan.riskLevel == 'HIGH' ? '#f43f5e' : (scan.riskLevel == 'MEDIUM' ? '#fbbf24' : '#10b981')})"></div>
+                                    </div>
+                                </td>
+                                <td class="pe-4">
+                                    <span th:if="${scan.riskLevel == 'LOW'}" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-20 px-3 x-small fw-800">SAFE_NODE</span>
+                                    <span th:if="${scan.riskLevel == 'MEDIUM'}" class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-20 px-3 x-small fw-800">SUSPICIOUS_ACT</span>
+                                    <span th:if="${scan.riskLevel == 'HIGH'}" class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-20 px-3 x-small fw-800">THREAT_CRITICAL</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const scanForm = document.getElementById('scanForm');
         const startBtn = document.getElementById('startBtn');
@@ -145,6 +238,7 @@
         const progressContainer = document.getElementById('progressContainer');
         const progressFill = document.getElementById('progressFill');
         const progressLabel = document.getElementById('progressLabel');
+        const progressPct = document.getElementById('progressPct');
         const resultsPanel = document.getElementById('resultsPanel');
         const phasesList = document.getElementById('phasesList');
         const riskGauge = document.getElementById('riskGauge');
@@ -152,58 +246,105 @@
         const riskLabel = document.getElementById('riskLabel');
         const summaryText = document.getElementById('summaryText');
         const fixAllContainer = document.getElementById('fixAllContainer');
+        const summaryNode = document.getElementById('summaryNode');
 
         const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
-        function addLog(msg, prefix = 'SYS:', cssClass = '') {
+        function addLog(msg, prefix = 'CORE_SYS:', cssClass = '') {
             const line = document.createElement('div');
             line.className = 'terminal-line ' + cssClass;
-            line.innerHTML = `<span class="time">[${new Date().toLocaleTimeString()}]</span><span class="prefix">${prefix}</span><span class="msg">${msg}</span>`;
+            line.innerHTML = `<span class="time">[${new Date().toLocaleTimeString('en-GB')}]</span><span class="prefix">${prefix}</span><span class="msg">${msg}</span>`;
             terminal.appendChild(line);
             terminal.scrollTop = terminal.scrollHeight;
         }
 
-        async function animateFindings(phases, riskLevel) {
+        function setProgress(pct, label) {
+            progressFill.style.width = pct + '%';
+            progressLabel.textContent = label;
+            progressPct.textContent = Math.round(pct) + '%';
+        }
+
+        function hideResults() {
+            resultsPanel.classList.add('fade-out');
+            setTimeout(() => {
+                resultsPanel.style.display = 'none';
+                resultsPanel.classList.remove('fade-out');
+            }, 300);
+        }
+
+        async function stepScan(phases, riskLevel) {
             for (let i = 0; i < phases.length; i++) {
                 const phase = phases[i];
-                progressFill.style.width = ((i+1)/phases.length * 100) + '%';
-                progressLabel.textContent = `Analyzing: ${phase.name}...`;
-                addLog(`PHASE ${i+1}: ${phase.name}`, 'SCAN:', 'text-info fw-700');
+                const startPct = (i / phases.length) * 100;
+                const endPct = ((i + 1) / phases.length) * 100;
+                
+                // Slow down the experience to make it feel deep
+                setProgress(startPct, `BOOTING_MODULE: ${phase.name.toUpperCase()}...`);
+                await new Promise(r => setTimeout(r, 600));
+                
+                addLog(`INJECTING_MODULE: ${phase.name}`, 'SCANNER:', 'text-primary fw-800');
                 
                 for (const finding of phase.findings) {
                     let css = '';
-                    if (finding.startsWith('✗')) css = 'finding-critical';
-                    else if (finding.startsWith('⚠')) css = 'finding-warning';
-                    else if (finding.startsWith('✓')) css = 'finding-safe';
-                    addLog(finding, 'FIND:', css);
-                    await new Promise(r => setTimeout(r, 50));
+                    let prefix = 'FOUND:';
+                    if (finding.startsWith('✗')) { css = 'finding-critical'; prefix = 'THREAT:'; }
+                    else if (finding.startsWith('⚠')) { css = 'finding-warning'; prefix = 'ALERT:'; }
+                    else if (finding.startsWith('✓')) { css = 'finding-safe'; prefix = 'PASS:'; }
+                    else if (finding.startsWith('○')) { css = 'text-white-50'; prefix = 'INFO:'; }
+                    
+                    addLog(finding, prefix, css);
+                    // Realistic typing/processing jitter
+                    await new Promise(r => setTimeout(r, 100 + Math.random() * 200));
+                    
+                    const chunkPct = startPct + ((endPct - startPct) * (phase.findings.indexOf(finding) / phase.findings.length));
+                    setProgress(chunkPct, `AUDITING: ${phase.name.toUpperCase()}...`);
                 }
+                
+                addLog(`MODULE_PHASE_COMPLETE: ${phase.name} (Duration: ${phase.durationMs}ms)`, 'SYSTEM:', 'text-muted x-small');
+                setProgress(endPct, `SYNCHRONIZING_CORE_STATE...`);
+                await new Promise(r => setTimeout(r, 400));
             }
+            setProgress(100, 'AUDIT_COMPLETE_GENERATING_INTEL_REPORT');
+            await new Promise(r => setTimeout(r, 800));
         }
 
         scanForm.onsubmit = async (e) => {
             e.preventDefault();
             const payload = document.getElementById('targetIp').value;
+            if (!payload.trim()) return;
+
             startBtn.disabled = true;
             terminal.innerHTML = '';
             resultsPanel.style.display = 'none';
             progressContainer.style.display = 'block';
-            scanStatus.textContent = 'SCANNING';
-            addLog('Initializing Deep Scan Engine...', 'SYS:');
-
+            scanStatus.textContent = 'ANALYSIS_IN_PROGRESS';
+            
+            addLog(`Deep Audit initialized for Node: ${payload}`, 'CORE_SYS:');
+            addLog(`Establishing secure heuristic tunnel...`, 'CORE_SYS:');
+            
             try {
-                const res = await fetch('/api/scans/analyze', {
+                // Pre-fetch API call while animating
+                const apiPromise = fetch('/api/scans/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded', [csrfHeader]: csrfToken },
                     body: `payload=${encodeURIComponent(payload)}`
                 });
+
+                // Start the heavy-duty animation
+                // We'll wait a bit to simulate real "deep" processing even before results arrive
+                await new Promise(r => setTimeout(r, 1500));
+                
+                const res = await apiPromise;
+                if (!res.ok) throw new Error('Kernel communication fault: ' + res.status);
+                
                 const data = await res.json();
+                await stepScan(data.phases, data.riskRating);
                 
-                await animateFindings(data.phases, data.riskRating);
-                
+                // Final Verdict Animation
+                summaryNode.textContent = payload;
                 scoreText.textContent = Math.round(data.threatScore);
-                riskLabel.textContent = data.riskRating + ' RISK';
+                riskLabel.textContent = data.riskRating + '_VERDICT';
                 summaryText.textContent = data.summary;
                 riskGauge.className = 'risk-gauge mb-3 risk-' + data.riskRating.toLowerCase();
                 
@@ -211,15 +352,28 @@
                 data.phases.forEach(p => {
                     const card = document.createElement('div');
                     card.className = 'phase-card';
-                    card.innerHTML = `<div class="phase-card-header" onclick="this.parentElement.classList.toggle('expanded')"><span>${p.name}</span><i class="bi bi-chevron-down"></i></div><div class="phase-card-body">${p.findings.map(f => `<div>${f}</div>`).join('')}</div>`;
+                    card.innerHTML = `
+                        <div class="phase-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+                            <span class="x-small fw-800 text-white"><i class="bi bi-cpu-fill me-2 text-primary"></i>${p.name.toUpperCase()}</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="x-small text-muted mono">${p.durationMs}ms</span>
+                                <i class="bi bi-chevron-down text-muted"></i>
+                            </div>
+                        </div>
+                        <div class="phase-card-body">
+                            ${p.findings.map(f => `<div class="x-small mb-2 d-flex gap-2"><div style="min-width:15px">${f.charAt(0)}</div><span class="text-white-50">${f.substring(2)}</span></div>`).join('')}
+                        </div>
+                    `;
                     phasesList.appendChild(card);
                 });
 
                 resultsPanel.style.display = 'block';
                 if (data.riskRating !== 'LOW') fixAllContainer.style.display = 'block';
-                scanStatus.textContent = 'COMPLETE';
+                scanStatus.textContent = 'SCAN_KERNEL_SUCCESS';
+                
             } catch (err) {
-                addLog('CRITICAL FAULT: ' + err.message, 'ERR:', 'finding-critical');
+                addLog(`CRITICAL_KERNEL_FAULT: ${err.message}`, 'ERR:', 'finding-critical');
+                scanStatus.textContent = 'KERNEL_FAULT';
             } finally {
                 startBtn.disabled = false;
             }
@@ -228,13 +382,20 @@
         document.getElementById('fixAllBtn').onclick = async () => {
             const btn = document.getElementById('fixAllBtn');
             btn.disabled = true;
-            btn.innerHTML = 'ACTIVATING OVERRIDE...';
-            const res = await fetch('/api/mitigations/fix-all', { method: 'POST', headers: { [csrfHeader]: csrfToken } });
-            const data = await res.json();
-            if (data.status === 'success') {
-                btn.className = 'btn btn-success w-100 py-3 mt-4';
-                btn.innerHTML = 'MITIGATION ACTIVE';
-                addLog('UNIVERSAL MITIGATION ACTIVE', 'CORE:');
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> REWRITING_SECURITY_MATRIX...';
+            
+            try {
+                const res = await fetch('/api/mitigations/fix-all', { method: 'POST', headers: { [csrfHeader]: csrfToken } });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    btn.className = 'btn btn-success w-100 py-3 mt-4 fw-900';
+                    btn.innerHTML = '<i class="bi bi-shield-fill-check me-2"></i> INFRASTRUCTURE_SECURED';
+                    addLog('UNIVERSAL MITIGATION OVERRIDE: SUCCESSFUL', 'CORE_SYS:', 'finding-safe');
+                    addLog('All active threats neutralized. VORTEX shield level at 100%.', 'CORE_SYS:', 'finding-safe');
+                }
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerHTML = 'RETRY_FIX_ALL';
             }
         };
     </script>
